@@ -9,6 +9,7 @@
   <!-- Firebase SDK (Compat v10) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -42,49 +43,41 @@
       scrollbar-width: none;
     }
 
-    /* Gaya khusus Cetak / Simpan PDF (Menyerupai Formulir Resmi Dinas) */
+    /* Format ekspor resmi: A4 landscape, rapat, simetris, dan konsisten untuk PDF/JPG */
+    @page { size: A4 landscape; margin: 5mm; }
     @media print {
-      @page {
-        size: A4 portrait;
-        margin: 10mm 12mm;
-      }
-      body {
-        background: #FFFFFF !important;
-        color: #000000 !important;
-        font-family: 'Times New Roman', Times, serif !important;
-        font-size: 9.5pt !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      .no-print {
-        display: none !important;
-      }
-      .print-only {
-        display: block !important;
-      }
-      table.official-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 6px;
-      }
-      table.official-table th,
-      table.official-table td {
-        border: 1px solid #000000;
-        padding: 2.5px 5px;
-        font-size: 8.8pt;
-        line-height: 1.2;
-      }
-      table.official-table th {
-        background-color: #E5E7EB !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-        font-weight: bold;
-        text-align: center;
-      }
+      html, body { background:#fff !important; color:#111 !important; margin:0 !important; padding:0 !important; }
+      body { font-family:"Times New Roman",serif !important; font-size:7.2pt !important; }
+      .no-print { display:none !important; }
+      .print-only { display:block !important; }
+      #printContainer { display:block !important; width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; background:#fff !important; }
+      #printContainer table { max-width:100% !important; }
+      #printContainer img { max-height:34px !important; max-width:130px !important; object-fit:contain !important; }
+      #printContainer thead { display:table-header-group; }
+      #printContainer tr { break-inside:avoid; page-break-inside:avoid; }
+      #printContainer .print-page { break-after:page; page-break-after:always; }
+      #printContainer .print-page:last-child { break-after:auto; page-break-after:auto; }
     }
+    #printContainer { background:#fff; color:#111; width:100%; font-family:"Times New Roman",serif; font-size:7.4pt; line-height:1.12; }
+    #printContainer, #printContainer * { box-sizing:border-box; }
+    #printContainer table { border-collapse:collapse; max-width:100%; }
+    table.official-table { width:100% !important; border-collapse:collapse !important; table-layout:fixed !important; margin:4px 0 0; }
+    table.official-table th, table.official-table td {
+      border:0.55pt solid #667085 !important; padding:3.2pt 5pt !important; font-size:7.4pt !important;
+      line-height:1.18 !important; vertical-align:middle !important;
+      white-space:normal !important; overflow-wrap:break-word !important; word-break:normal !important;
+    }
+    table.official-table th { background:#e9edf2 !important; font-weight:700 !important; text-align:center !important; }
+    table.official-table td.text-col, table.official-table th.text-col { text-align:left !important; }
+    table.official-table td.number-col, table.official-table th.number-col { text-align:right !important; font-variant-numeric:tabular-nums; }
+    table.official-table td.center-col, table.official-table th.center-col { text-align:center !important; }
+    table.official-table tbody tr:nth-child(even) { background:#f7f9fb !important; }
+    #printContainer p, #printContainer div { overflow-wrap:anywhere; }
+    #printContainer .print-page { width:100%; padding:5mm !important; break-after:page; page-break-after:always; }
+    #printContainer .print-page:last-child { break-after:auto; page-break-after:auto; }
   </style>
 </head>
-<body class="text-slate-800 antialiased pb-28">
+<body class="text-slate-800 antialiased">
 
   <!-- ===================================================================== -->
   <!-- ANTARMUKA APLIKASI MOBILE-FIRST (NO-PRINT)                            -->
@@ -140,15 +133,6 @@
           </svg>
         </div>
 
-        <!-- Quick Switch Pill Tabs -->
-        <div class="grid grid-cols-2 gap-2 mt-2">
-          <button type="button" data-unit-pill="B9006PHA" class="unit-pill-btn py-1.5 px-2.5 rounded-xl text-[11px] font-bold border transition text-center truncate">
-            🚒 B 9006 PHA (Medium)
-          </button>
-          <button type="button" data-unit-pill="B9636PHA" class="unit-pill-btn py-1.5 px-2.5 rounded-xl text-[11px] font-bold border transition text-center truncate">
-            🚒 B 9636 PHA (Light 2500L)
-          </button>
-        </div>
       </div>
 
       <!-- Info Lokasi & Status Auto-Sync Cloud -->
@@ -232,34 +216,19 @@
             </div>
           </div>
 
-          <!-- Kepala Regu Naik Piket -->
           <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-2.5">
             <div class="text-xs font-bold text-red-700 uppercase tracking-wide">Kepala Regu Naik Piket (Menerima)</div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <div>
-                <label for="karuNaikNama" class="block text-[11px] font-medium text-slate-600 mb-1">Nama Lengkap</label>
-                <input type="text" id="karuNaikNama" placeholder="Nama Karu Naik Piket" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600" />
-              </div>
-              <div>
-                <label for="karuNaikNip" class="block text-[11px] font-medium text-slate-600 mb-1">NIP / NRK</label>
-                <input type="text" id="karuNaikNip" placeholder="Masukkan NIP / NRK" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-600" />
-              </div>
-            </div>
+            <label for="karuNaikNama" class="block text-[11px] font-medium text-slate-600">Nama Lengkap</label>
+            <input type="text" id="karuNaikNama" placeholder="Nama kepala regu naik piket" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" />
+            <div class="flex justify-between items-center"><label class="text-[11px] font-semibold text-slate-600">Tanda tangan</label><button type="button" id="clearKaruNaikSignature" class="text-[11px] font-bold text-red-700">Hapus</button></div>
+            <canvas id="karuNaikSignature" width="720" height="180" class="w-full h-28 bg-white border border-dashed border-slate-300 rounded-xl touch-none"></canvas>
           </div>
-
-          <!-- Kepala Regu Lepas Piket -->
           <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-2.5">
             <div class="text-xs font-bold text-slate-700 uppercase tracking-wide">Kepala Regu Lepas Piket (Menyerahkan)</div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <div>
-                <label for="karuLepasNama" class="block text-[11px] font-medium text-slate-600 mb-1">Nama Lengkap</label>
-                <input type="text" id="karuLepasNama" placeholder="Nama Karu Lepas Piket" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600" />
-              </div>
-              <div>
-                <label for="karuLepasNip" class="block text-[11px] font-medium text-slate-600 mb-1">NIP / NRK</label>
-                <input type="text" id="karuLepasNip" placeholder="Masukkan NIP / NRK" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-600" />
-              </div>
-            </div>
+            <label for="karuLepasNama" class="block text-[11px] font-medium text-slate-600">Nama Lengkap</label>
+            <input type="text" id="karuLepasNama" placeholder="Nama kepala regu lepas piket" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" />
+            <div class="flex justify-between items-center"><label class="text-[11px] font-semibold text-slate-600">Tanda tangan</label><button type="button" id="clearKaruLepasSignature" class="text-[11px] font-bold text-red-700">Hapus</button></div>
+            <canvas id="karuLepasSignature" width="720" height="180" class="w-full h-28 bg-white border border-dashed border-slate-300 rounded-xl touch-none"></canvas>
           </div>
         </div>
       </section>
@@ -321,6 +290,21 @@
         <!-- Dirender dinamis oleh JavaScript sesuai Unit aktif -->
       </section>
 
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-3">
+        <div class="flex items-center justify-between gap-2"><h2 class="font-bold text-slate-800 text-sm">Tambah Peralatan</h2><span class="text-[10px] text-slate-500">Item tambahan unit</span></div>
+        <div class="grid grid-cols-[1fr_76px] gap-2"><input id="newEquipmentName" type="text" placeholder="Nama peralatan baru" class="min-w-0 rounded-xl border border-slate-300 px-3 py-2 text-sm"/><input id="newEquipmentQty" type="number" min="1" value="1" class="rounded-xl border border-slate-300 px-3 py-2 text-sm"/></div>
+        <button id="addEquipmentBtn" type="button" class="w-full rounded-xl bg-slate-800 text-white py-2.5 text-xs font-bold">＋ Tambahkan ke daftar</button>
+      </section>
+
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-3">
+        <h2 class="font-bold text-slate-800 text-sm">Keterangan</h2>
+        <p class="text-[11px] text-slate-500">Gabungkan catatan kondisi unit dan jurnal kegiatan regu piket selama 24 jam dalam satu kolom.</p>
+        <textarea id="generalRemarks" rows="6" placeholder="Contoh: BBM ¾ tangki, air tangki penuh, kondisi mesin normal.
+08.00 — Apel dan pengecekan personel
+10.30 — Pemeliharaan peralatan
+14.15 — Respons kejadian ..." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"></textarea>
+      </section>
+
       <!-- TAMPILAN JIKA HASIL FILTER / PENCARIAN KOSONG -->
       <div id="emptyState" class="hidden bg-white rounded-2xl border border-slate-200 p-8 text-center">
         <p class="text-sm font-semibold text-slate-600">Tidak ada peralatan yang cocok dengan filter saat ini.</p>
@@ -343,35 +327,39 @@
         <div id="waPreviewBox" class="bg-slate-900 text-slate-100 rounded-xl p-3.5 font-mono text-[11px] sm:text-xs leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto border border-slate-700"></div>
       </section>
 
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-3 mt-4 mb-4">
+        <div class="flex items-center gap-2"><span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">↓</span><div><h2 class="font-bold text-slate-800 text-sm">Unduh / Cetak Laporan</h2><p class="text-[11px] text-slate-500">Pilih jenis laporan dan format dalam satu tempat.</p></div></div>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="text-xs font-semibold text-slate-600">Jenis laporan<select id="downloadScope" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"><option value="daily">Harian</option><option value="monthly">Bulanan</option></select></label>
+          <label class="text-xs font-semibold text-slate-600">Format<select id="downloadFormat" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"><option value="jpg">JPG</option><option value="pdf">PDF / Cetak</option></select></label>
+        </div>
+        <div id="downloadDailyOptions" class="text-xs text-slate-600">Tanggal mengikuti tanggal laporan yang sedang dipilih.</div>
+        <div id="downloadMonthlyOptions" class="hidden space-y-2">
+          <label class="block text-xs font-semibold text-slate-600">Bulan<input type="month" id="printMonth" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"/></label>
+          <label class="block text-xs font-semibold text-slate-600">Isi laporan<select id="monthlyMode" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"><option value="summary">Rekap bulanan (1 lembar)</option><option value="detail">Rincian ceklis harian sebulan penuh</option></select></label>
+        </div>
+        <button type="button" id="downloadReportBtn" class="w-full rounded-xl bg-amber-600 hover:bg-amber-700 text-white py-3 text-sm font-bold">Unduh Laporan</button>
+      </section>
     </main>
 
-    <!-- =================================================================== -->
-    <!-- STICKY FOOTER AKSI LAPORAN (SALIN WA, KIRIM WA, CETAK / PDF)        -->
-    <!-- =================================================================== -->
-    <footer class="fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2.5 shadow-[0_-4px_14px_rgba(0,0,0,0.08)]">
-      <div class="max-w-2xl mx-auto grid grid-cols-3 gap-2">
-        <button type="button" id="copyWaBtn" class="py-2.5 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 active:scale-97 text-white font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 shadow-xs transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-          <span>Salin Laporan WA</span>
+    <!-- Tombol laporan WhatsApp terpadu -->
+    <footer class="mt-6 mb-5 border-t border-slate-200 bg-white px-4 py-4">
+      <div class="max-w-2xl mx-auto space-y-2">
+        <button type="button" id="waActionBtn" disabled aria-disabled="true" class="w-full py-3 px-4 rounded-xl bg-slate-300 text-slate-500 font-bold text-sm flex items-center justify-center gap-2 shadow-sm cursor-not-allowed">
+          <span>🟢</span><span id="waActionLabel">Selesaikan pemeriksaan terlebih dahulu</span>
         </button>
-
-        <button type="button" id="sendWaBtn" class="py-2.5 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-97 text-white font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 shadow-xs transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"/>
-          </svg>
-          <span>Kirim WA</span>
-        </button>
-
-        <button type="button" id="printPdfBtn" class="py-2.5 px-2.5 rounded-xl bg-red-700 hover:bg-red-800 active:scale-97 text-white font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 shadow-xs transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-          </svg>
-          <span>Cetak / PDF</span>
-        </button>
+        <p id="waActionHint" class="text-center text-[11px] text-slate-500">Tombol WhatsApp aktif setelah seluruh peralatan selesai diperiksa.</p>
       </div>
     </footer>
+
+    <div id="waActionModal" class="hidden fixed inset-0 z-50 bg-slate-900/70 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl p-5 w-full max-w-sm space-y-3 shadow-2xl">
+        <div class="flex items-center justify-between"><h3 class="font-bold text-slate-900">Laporan WhatsApp</h3><button id="closeWaActionModal" class="w-8 h-8 rounded-full bg-slate-100 font-bold">×</button></div>
+        <p class="text-xs text-slate-500">Pilih tindakan untuk laporan yang sama.</p>
+        <button id="copyWaBtn" class="w-full rounded-xl bg-slate-800 text-white py-3 text-sm font-bold">Salin teks laporan</button>
+        <button id="sendWaBtn" class="w-full rounded-xl bg-emerald-600 text-white py-3 text-sm font-bold">Buka WhatsApp untuk mengirim</button>
+      </div>
+    </div>
 
     <!-- =================================================================== -->
     <!-- MODAL QR CODE UNIT (UNTUK TEMPEL DI KOMPARTEMEN ARMADA)             -->
@@ -427,7 +415,7 @@
               Salin Link Unit
             </button>
             <button type="button" id="downloadQrSvgBtn" class="py-2.5 px-3 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs flex items-center justify-center gap-1.5">
-              Unduh Gambar QR
+              Unduh QR JPG
             </button>
           </div>
         </div>
@@ -598,14 +586,119 @@
     };
 
     const STORAGE_PREFIX = 'gulkarmat_sektor5_cloud_v2_';
+    const STANDARD_PREFIX = 'gulkarmat_sektor5_standard_v2_';
+    const masterUnsubscribers = {};
+    function masterDocId(unitId) { return `master_${unitId}`; }
+    function applyMasterData(unitId, master) {
+      if (!master) return;
+      const cfg = UNITS_CONFIG[unitId];
+      const quantities = master.quantities || {};
+      Object.entries(quantities).forEach(([id, qty]) => {
+        const item = cfg.items.find(x => String(x.id) === String(id));
+        if (item && Number(qty) > 0) item.qty = Number(qty);
+      });
+      if (Array.isArray(master.customItems)) {
+        cfg.items = cfg.items.filter(x => !x.custom);
+        master.customItems.forEach(x => {
+          if (!cfg.items.some(y => String(y.id) === String(x.id))) cfg.items.push({...x, custom:true});
+        });
+      }
+      localStorage.setItem(STANDARD_PREFIX + unitId, JSON.stringify(master));
+      const active = unitStates[unitId];
+      if (active && Array.isArray(active.items)) {
+        active.items = active.items.filter(x => !x.custom || (master.customItems || []).some(y => String(y.id) === String(x.id)));
+        (master.customItems || []).forEach(x => {
+          if (!active.items.some(y => String(y.id) === String(x.id))) active.items.push({...x, checked:false, status:'ada', condition:'baik', goodQty:x.qty, badQty:0, note:'', showNote:false, custom:true});
+        });
+        active.items.forEach(x => { if (quantities[x.id] && !x.checked) { x.qty=Number(quantities[x.id]); x.goodQty=x.qty; x.badQty=0; } });
+      }
+    }
+    function getActiveConfigForUnit(unitId) { return UNITS_CONFIG[unitId]; }
+    function getMasterData(unitId) {
+      const cfg = UNITS_CONFIG[unitId];
+      const quantities = Object.fromEntries(cfg.items.filter(x => !x.custom).map(x => [x.id, Number(x.qty)]));
+      const customItems = cfg.items.filter(x => x.custom).map(x => ({id:x.id,name:x.name,qty:Number(x.qty)||1,unit:x.unit||'Buah',custom:true}));
+      return { quantities, customItems };
+    }
+    async function saveMasterData(unitId = activeUnitId) {
+      const master = getMasterData(unitId);
+      localStorage.setItem(STANDARD_PREFIX + unitId, JSON.stringify(master));
+      const today = getCurrentDutyDateISO();
+      // Simpan sebagai dokumen master dalam koleksi yang sama dengan laporan harian,
+      // agar tidak membutuhkan koleksi/aturan Firestore baru.
+      await db.collection('ceklis_harian').doc(masterDocId(unitId)).set({
+        unit_id: unitId, tanggal: today, record_type: 'master', payload: {...master, items: getActiveConfigForUnit(unitId).items.map(x => ({id:x.id,name:x.name,qty:x.qty,unit:x.unit,custom:!!x.custom}))},
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, {merge:true});
+      return master;
+    }
+    async function loadStandardOverrides(unitId) {
+      try {
+        const cached = JSON.parse(localStorage.getItem(STANDARD_PREFIX + unitId) || 'null');
+        if (cached) applyMasterData(unitId, cached);
+      } catch(e) { console.warn('Cache standar tidak terbaca:', e); }
+      try {
+        const doc = await db.collection('ceklis_harian').doc(masterDocId(unitId)).get();
+        if (doc.exists && doc.data().payload) applyMasterData(unitId, doc.data().payload);
+      } catch(e) { console.warn('Standar cloud belum dapat dimuat:', e.code || e.message); }
+      if (masterUnsubscribers[unitId]) masterUnsubscribers[unitId]();
+      masterUnsubscribers[unitId] = db.collection('ceklis_harian').doc(masterDocId(unitId)).onSnapshot(doc => {
+        if (doc.exists && doc.data().payload) {
+          applyMasterData(unitId, doc.data().payload);
+          if (activeUnitId === unitId) { renderEquipmentList(); updateStatsAndProgress(); updateOutputs(); }
+        }
+      }, err => { console.error('Master equipment listener:', err); setSyncBadge('offline', `Master cloud gagal: ${err.code || 'error'}`); });
+    }
+    async function saveStandardQty(itemId, qty) {
+      const item = getActiveConfig().items.find(x => String(x.id) === String(itemId));
+      if (item) item.qty = Number(qty);
+      return saveMasterData(activeUnitId);
+    }
+
 
     // =========================================================================
     // 2. UTILITAS TANGGAL, HARI & FORMAT TEKS
     // =========================================================================
-    function getTodayISO() {
-      const now = new Date();
-      const offset = now.getTimezoneOffset() * 60000;
-      return new Date(now.getTime() - offset).toISOString().split('T')[0];
+    // Jadwal piket memakai zona waktu Jakarta dan pergantian shift pukul 07.30.
+    const SHIFT_ANCHOR_DATE = '2026-11-15';
+    const SHIFT_ANCHOR_GROUP_INDEX = 0; // Group A bertugas mulai 15 Nov 2026 pukul 07.30 WIB
+    const GROUPS = ['Group A', 'Group B', 'Group C'];
+
+    function jakartaParts(date = new Date()) {
+      const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(date);
+      return Object.fromEntries(parts.map(p => [p.type, p.value]));
+    }
+    function addDaysISO(iso, amount) {
+      const [y,m,d] = iso.split('-').map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, d + amount));
+      return dt.toISOString().slice(0,10);
+    }
+    function getCurrentDutyDateISO() {
+      const x = jakartaParts();
+      const today = `${x.year}-${x.month}-${x.day}`;
+      return (Number(x.hour) < 7 || (Number(x.hour) === 7 && Number(x.minute) < 30)) ? addDaysISO(today, -1) : today;
+    }
+    function getTodayISO() { return getCurrentDutyDateISO(); }
+    function getGroupForDutyDate(iso) {
+      const [ay,am,ad] = SHIFT_ANCHOR_DATE.split('-').map(Number);
+      const [y,m,d] = iso.split('-').map(Number);
+      const days = Math.round((Date.UTC(y,m-1,d) - Date.UTC(ay,am-1,ad)) / 86400000);
+      return GROUPS[((SHIFT_ANCHOR_GROUP_INDEX + days) % 3 + 3) % 3];
+    }
+    function isCurrentShiftEditable() {
+      return getActiveState().tanggal === getCurrentDutyDateISO();
+    }
+    function showLockStatus() {
+      const editable = isCurrentShiftEditable();
+      let banner = document.getElementById('shiftLockBanner');
+      if (!banner) {
+        banner = document.createElement('div'); banner.id = 'shiftLockBanner';
+        banner.className = 'mx-4 mt-3 rounded-xl border px-3 py-2 text-xs font-semibold';
+        const main = document.querySelector('main');
+        main?.prepend(banner);
+      }
+      banner.className = `mx-4 mt-3 rounded-xl border px-3 py-2 text-xs font-semibold ${editable ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-amber-300 bg-amber-50 text-amber-900'}`;
+      banner.textContent = editable ? '🟢 Periode piket aktif — pengisian dapat dilakukan sampai pukul 07.30 WIB berikutnya.' : `🔒 Laporan ${formatIndonesianDate(getActiveState().tanggal)} terkunci (hanya baca). Pengisian hanya tersedia pada periode piket yang sedang berjalan.`;
     }
 
     function getIndonesianDayName(isoString) {
@@ -674,11 +767,12 @@
       return {
         tanggal: tgl,
         hari: getIndonesianDayName(tgl),
-        regu: 'Group A',
+        regu: getGroupForDutyDate(tgl),
+        keteranganUmum: '',
+        tandaTanganNaik: '',
+        tandaTanganLepas: '',
         karuNaikNama: '',
-        karuNaikNip: '',
         karuLepasNama: '',
-        karuLepasNip: '',
         items: cfg.items.map(eq => ({
           ...eq,
           checked: false,
@@ -712,6 +806,7 @@
     // Simpan otomatis ke Cloud Firestore & cadangan localStorage
     function saveActiveState() {
       if (isRemoteUpdate) return;
+      if (!isCurrentShiftEditable()) { showToast('Periode laporan sudah terkunci / belum dimulai.'); return; }
       const st = getActiveState();
       const docId = getDailyDocId(activeUnitId, st.tanggal);
 
@@ -733,7 +828,7 @@
           setSyncBadge('synced', `Tersinkron (${activeUnitId})`);
         } catch (err) {
           console.error('Gagal sinkron ke Firebase:', err);
-          setSyncBadge('offline', 'Offline (Tersimpan di HP)');
+          setSyncBadge('offline', `Cloud gagal: ${err.code || err.message || 'periksa Rules/koneksi'}`);
         }
       }, 500);
     }
@@ -754,6 +849,7 @@
           const parsed = JSON.parse(cached);
           if (parsed && Array.isArray(parsed.items)) {
             unitStates[unitId] = parsed;
+            if (!unitStates[unitId].keteranganUmum) unitStates[unitId].keteranganUmum = [parsed.catatanKondisiUnit, parsed.jurnalKegiatan].filter(Boolean).join('\n\n');
           }
         } else {
           unitStates[unitId] = createInitialUnitState(unitId, tanggal);
@@ -762,9 +858,12 @@
         unitStates[unitId] = createInitialUnitState(unitId, tanggal);
       }
 
+      unitStates[unitId].regu = getGroupForDutyDate(tanggal);
       renderHeaderAndMeta();
       updateStatsAndProgress();
       renderEquipmentList();
+      renderExtraNotes();
+      showLockStatus();
       updateOutputs();
 
       unsubscribeLive = db.collection('ceklis_harian').doc(docId).onSnapshot(
@@ -775,11 +874,13 @@
           if (doc.exists && doc.data() && doc.data().payload) {
             const remoteData = doc.data().payload;
             const currentItems = unitStates[unitId].items;
-            if (Array.isArray(remoteData.items) && remoteData.items.length === currentItems.length) {
+            if (Array.isArray(remoteData.items)) {
               remoteData.items.forEach((rItem, idx) => {
-                rItem.showNote = currentItems[idx].showNote || false;
+                rItem.showNote = currentItems.find(x => x.id === rItem.id)?.showNote || false;
               });
               unitStates[unitId] = remoteData;
+              if (!unitStates[unitId].keteranganUmum) unitStates[unitId].keteranganUmum = [remoteData.catatanKondisiUnit, remoteData.jurnalKegiatan].filter(Boolean).join('\n\n');
+              unitStates[unitId].regu = getGroupForDutyDate(tanggal);
               try {
                 localStorage.setItem(STORAGE_PREFIX + docId, JSON.stringify(remoteData));
               } catch (e) {}
@@ -791,6 +892,10 @@
           renderHeaderAndMeta();
           updateStatsAndProgress();
           renderEquipmentList();
+          renderExtraNotes();
+          document.getElementById('karuNaikSignature')?._restore?.();
+          document.getElementById('karuLepasSignature')?._restore?.();
+          showLockStatus();
           updateOutputs();
           setSyncBadge('synced', `Tersinkron (${unitId})`);
           isRemoteUpdate = false;
@@ -803,10 +908,10 @@
       );
     }
 
-    // Pantau pergantian hari otomatis saat tengah malam (00:00) jika halaman dibiarkan terbuka
+    // Pantau pergantian shift otomatis setiap 30 detik (07.30 WIB)
     let lastKnownToday = getTodayISO();
     setInterval(() => {
-      const currentToday = getTodayISO();
+      const currentToday = getCurrentDutyDateISO();
       if (currentToday !== lastKnownToday) {
         const prevToday = lastKnownToday;
         lastKnownToday = currentToday;
@@ -871,25 +976,18 @@
       document.getElementById('unitSelector').value = activeUnitId;
       document.getElementById('headerUnitSubtitle').textContent = `${cfg.pos} • ${cfg.jenisKdo}`;
 
-      document.querySelectorAll('.unit-pill-btn').forEach(btn => {
-        const isCurrent = btn.dataset.unitPill === activeUnitId;
-        if (isCurrent) {
-          btn.className = 'unit-pill-btn py-1.5 px-2.5 rounded-xl text-[11px] font-bold border bg-amber-400 text-red-950 border-amber-300 shadow-xs transition text-center truncate';
-        } else {
-          btn.className = 'unit-pill-btn py-1.5 px-2.5 rounded-xl text-[11px] font-bold border bg-black/25 text-red-100 border-white/15 hover:bg-black/35 transition text-center truncate';
-        }
-      });
 
       document.getElementById('inputTanggal').value = st.tanggal;
       document.getElementById('inputHari').value = st.hari;
 
       const activeEl = document.activeElement;
       if (activeEl?.id !== 'karuNaikNama') document.getElementById('karuNaikNama').value = st.karuNaikNama;
-      if (activeEl?.id !== 'karuNaikNip') document.getElementById('karuNaikNip').value = st.karuNaikNip;
       if (activeEl?.id !== 'karuLepasNama') document.getElementById('karuLepasNama').value = st.karuLepasNama;
-      if (activeEl?.id !== 'karuLepasNip') document.getElementById('karuLepasNip').value = st.karuLepasNip;
 
+      st.regu = getGroupForDutyDate(st.tanggal);
       document.querySelectorAll('.regu-btn').forEach(btn => {
+        btn.disabled = true;
+        btn.title = 'Group ditentukan otomatis berdasarkan rotasi 3 regu';
         const selected = btn.dataset.regu === st.regu;
         btn.className = selected
           ? 'regu-btn py-2.5 px-2 rounded-xl text-xs font-bold border bg-red-700 text-white border-red-700 shadow-xs transition-all'
@@ -898,6 +996,7 @@
 
       const dayText = st.hari ? `${st.hari}, ` : '';
       document.getElementById('metaSummaryPreview').textContent = `${dayText}${formatIndonesianDate(st.tanggal)} • ${st.regu}`;
+      showLockStatus();
     }
 
     function isItemProblematic(item) {
@@ -1088,12 +1187,14 @@
                     </span>
                     ${statusTagHtml}
                   </div>
+                  <div class="flex items-center gap-2 mt-2 text-[11px]"><span class="text-slate-500 font-semibold">Ubah standar:</span><button type="button" onclick="changeStandardQty(${item.id}, -1)" class="w-7 h-7 rounded-lg border border-slate-300 bg-white font-bold">−</button><span class="font-mono font-bold">${item.qty}</span><button type="button" onclick="changeStandardQty(${item.id}, 1)" class="w-7 h-7 rounded-lg border border-slate-300 bg-white font-bold">＋</button></div>
                 </div>
               </div>
 
               <button type="button" onclick="toggleNoteField(${item.id})" title="Tambah/Edit Keterangan" class="text-[11px] font-semibold text-slate-500 hover:text-slate-800 bg-slate-100 px-2 py-1 rounded-lg shrink-0">
                 ${showDetailPanel && !prob ? 'Tutup Ket.' : '+ Ket.'}
               </button>
+              ${item.custom ? `<button type="button" onclick="removeCustomEquipment(${item.id})" title="Hapus peralatan tambahan" class="text-[11px] font-bold text-red-700 bg-red-50 border border-red-200 px-2 py-1 rounded-lg shrink-0">Hapus</button>` : ''}
             </div>
 
             ${controlsHtml}
@@ -1227,6 +1328,37 @@
       updateOutputs();
     };
 
+    window.changeStandardQty = async function(id, delta) {
+      if (!isCurrentShiftEditable()) { showToast('Periode laporan terkunci.'); return; }
+      const item = getActiveState().items.find(x => x.id === id);
+      if (!item) return;
+      item.qty = Math.max(1, Number(item.qty || 1) + delta);
+      if (item.checked && item.condition === 'baik') { item.goodQty = item.qty; item.badQty = 0; }
+      else { item.goodQty = Math.min(item.qty, Number(item.goodQty ?? item.qty)); item.badQty = Math.max(0, item.qty - item.goodQty); }
+      try { await saveStandardQty(id, item.qty); showToast('Standar jumlah tersimpan untuk hari berikutnya.'); }
+      catch(e) { showToast(`Tersimpan di HP, cloud gagal: ${e.code || e.message || 'periksa Rules Firebase'}`); }
+      saveActiveState(); updateStatsAndProgress(); renderEquipmentList(); updateOutputs();
+    };
+
+    window.removeCustomEquipment = function(id) {
+      if (!isCurrentShiftEditable()) { showToast('Periode laporan terkunci.'); return; }
+      const st = getActiveState(); const item = st.items.find(i => i.id === id && i.custom);
+      if (!item) return;
+      if (!confirm(`Hapus peralatan tambahan "${item.name}" dari daftar?`)) return;
+      st.items = st.items.filter(i => i.id !== id);
+      getActiveConfig().items = getActiveConfig().items.filter(i => i.id !== id);
+      saveActiveState();
+      saveMasterData(activeUnitId).then(()=>showToast('Peralatan dihapus dan daftar master tersinkron.')).catch(e=>showToast(`Gagal sinkron master: ${e.code || e.message}`));
+      updateStatsAndProgress(); renderEquipmentList(); updateOutputs();
+    };
+
+
+    function renderExtraNotes() {
+      const st = getActiveState();
+      const el = document.getElementById('generalRemarks');
+      if (el && document.activeElement !== el) el.value = st.keteranganUmum || [st.catatanKondisiUnit, st.jurnalKegiatan].filter(Boolean).join('\n\n');
+    }
+
     // =========================================================================
     // 7. GENERATOR LAPORAN WHATSAPP & CETAK FORMULIR RESMI (PDF / PRINT)
     // =========================================================================
@@ -1242,9 +1374,7 @@
       const dayPrefix = st.hari.trim() ? `${st.hari.trim()}, ` : '';
       const tglFormatted = `${dayPrefix}${formatIndonesianDate(st.tanggal)}`;
       const karuNaik = st.karuNaikNama.trim() || '-';
-      const nipNaik = st.karuNaikNip.trim() || '-';
       const karuLepas = st.karuLepasNama.trim() || '-';
-      const nipLepas = st.karuLepasNip.trim() || '-';
 
       let lines = [
         `*LAPORAN TIMBANG TERIMA PERALATAN*`,
@@ -1286,11 +1416,13 @@
         });
       }
 
+      if ((st.keteranganUmum || '').trim()) { lines.push('', '📝 *KETERANGAN:*', st.keteranganUmum.trim()); }
+
       const labelKaruNaik = activeUnitId === 'B9006PHA' ? 'Karu Piket' : 'Karu Naik Piket';
       lines.push(``);
       lines.push(`*Yang Memeriksa:*`);
-      lines.push(`• *${labelKaruNaik}:* ${karuNaik} (NIP/NRK: ${nipNaik})`);
-      lines.push(`• *Karu Lepas Piket:* ${karuLepas} (NIP/NRK: ${nipLepas})`);
+      lines.push(`• *${labelKaruNaik}:* ${karuNaik} — tanda tangan pada lembar laporan`);
+      lines.push(`• *Karu Lepas Piket:* ${karuLepas} — tanda tangan pada lembar laporan`);
 
       return lines.join('\n');
     }
@@ -1303,8 +1435,8 @@
       const tglStr = formatIndonesianDate(st.tanggal);
       const naikNama = st.karuNaikNama.trim() ? `( ${escapeHtml(st.karuNaikNama.trim())} )` : '( ........................................ )';
       const lepasNama = st.karuLepasNama.trim() ? `( ${escapeHtml(st.karuLepasNama.trim())} )` : '( ........................................ )';
-      const naikNip = escapeHtml(st.karuNaikNip.trim());
-      const lepasNip = escapeHtml(st.karuLepasNip.trim());
+      const sigNaik = st.tandaTanganNaik ? `<img src="${st.tandaTanganNaik}" style="height:34px;max-width:130px;object-fit:contain;"/>` : '<div style="height:48px;"></div>';
+      const sigLepas = st.tandaTanganLepas ? `<img src="${st.tandaTanganLepas}" style="height:34px;max-width:130px;object-fit:contain;"/>` : '<div style="height:48px;"></div>';
 
       if (activeUnitId === 'B9006PHA') {
         const rowsHtml = st.items.map(item => {
@@ -1322,19 +1454,19 @@
           const ketVal = item.note.trim() ? escapeHtml(item.note.trim()) : (item.checked && item.condition === 'baik' ? 'Baik' : '');
           return `
             <tr>
-              <td style="text-align: center;">${item.id}.</td>
-              <td>${escapeHtml(item.name)}</td>
-              <td style="text-align: center;">${item.qty}</td>
-              <td style="text-align: center;">${escapeHtml(item.unit)}</td>
-              <td style="text-align: center;">${baikVal}</td>
-              <td style="text-align: center;">${rusakVal}</td>
-              <td>${ketVal}</td>
+              <td class="center-col">${item.id}.</td>
+              <td class="text-col">${escapeHtml(item.name)}</td>
+              <td class="number-col">${item.qty}</td>
+              <td class="center-col">${escapeHtml(item.unit)}</td>
+              <td class="number-col">${baikVal}</td>
+              <td class="number-col">${rusakVal}</td>
+              <td class="text-col">${ketVal}</td>
             </tr>
           `;
         }).join('');
 
         container.innerHTML = `
-          <div style="text-align: center; font-weight: bold; font-size: 12pt; margin-bottom: 8px; letter-spacing: 0.4px;">
+          <div style="text-align: center; font-weight: bold; font-size: 9pt; margin-bottom: 4px; letter-spacing: 0.25px;">
             ${cfg.printTitle}
           </div>
 
@@ -1357,22 +1489,22 @@
             </tr>
           </table>
 
-          <table class="official-table">
+          <table class="official-table table-seven"><colgroup><col style="width:4%"><col style="width:33%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:29%"></colgroup>
             <thead>
               <tr>
-                <th style="width: 30px;">NO.</th>
-                <th>NAMA PERALATAN</th>
+                <th>NO.</th>
+                <th class="text-col">NAMA PERALATAN</th>
                 <th style="width: 54px;">JUMLAH</th>
                 <th style="width: 60px;">SATUAN</th>
                 <th style="width: 48px;">BAIK</th>
                 <th style="width: 50px;">RUSAK</th>
-                <th style="width: 140px;">KETERANGAN</th>
+                <th class="text-col" style="width: 140px;">KETERANGAN</th>
               </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
           </table>
 
-          <div style="margin-top: 12px; font-size: 9.5pt;">
+          <div style="margin-top: 5px; font-size: 7.5pt;">
             <div style="text-align: right; margin-bottom: 4px;">
               Jakarta, ${tglStr}
             </div>
@@ -1383,15 +1515,13 @@
               <tr>
                 <td style="width: 50%; vertical-align: top;">
                   <div style="font-weight: bold;">Kepala Regu Piket</div>
-                  <div style="height: 48px;"></div>
+                  ${sigNaik}
                   <div style="font-weight: bold; text-decoration: underline;">${naikNama}</div>
-                  <div style="text-align: left; padding-left: 44px; margin-top: 2px;">NIP. ${naikNip}</div>
                 </td>
                 <td style="width: 50%; vertical-align: top;">
                   <div style="font-weight: bold;">Kepala Regu Lepas Piket</div>
-                  <div style="height: 48px;"></div>
+                  ${sigLepas}
                   <div style="font-weight: bold; text-decoration: underline;">${lepasNama}</div>
-                  <div style="text-align: left; padding-left: 44px; margin-top: 2px;">NIP. ${lepasNip}</div>
                 </td>
               </tr>
             </table>
@@ -1407,30 +1537,20 @@
 
           return `
             <tr>
-              <td style="text-align: center;">${item.id}</td>
-              <td>${escapeHtml(item.name)}</td>
-              <td style="text-align: center;">${item.qty} ${escapeHtml(item.unit)}</td>
-              <td style="text-align: center; font-weight: bold;">${checkAda}</td>
-              <td style="text-align: center; font-weight: bold;">${checkTdkAda}</td>
-              <td style="text-align: center; font-weight: bold;">${checkBaik}</td>
-              <td style="text-align: center; font-weight: bold;">${checkRusak}</td>
-              <td>${ketVal}</td>
+              <td class="center-col">${item.id}</td>
+              <td class="text-col">${escapeHtml(item.name)}</td>
+              <td class="number-col">${item.qty} ${escapeHtml(item.unit)}</td>
+              <td class="center-col" style="font-weight:bold;">${checkAda}</td>
+              <td class="center-col" style="font-weight:bold;">${checkTdkAda}</td>
+              <td class="center-col" style="font-weight:bold;">${checkBaik}</td>
+              <td class="center-col" style="font-weight:bold;">${checkRusak}</td>
+              <td class="text-col">${ketVal}</td>
             </tr>
           `;
         }).join('');
 
-        const blankRowsHtml = [36, 37, 38, 39, 40].map(num => `
-          <tr>
-            <td style="text-align: center;">${num}</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-          </tr>
-        `).join('');
+        const blankRowsHtml = '';
+
 
         container.innerHTML = `
           <div style="text-align: center; font-weight: bold; font-size: 10.5pt; line-height: 1.3; margin-bottom: 8px;">
@@ -1460,15 +1580,15 @@
             </tr>
           </table>
 
-          <table class="official-table">
+          <table class="official-table table-eight"><colgroup><col style="width:4%"><col style="width:30%"><col style="width:11%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:27%"></colgroup>
             <thead>
               <tr>
-                <th rowspan="2" style="width: 26px;">No</th>
-                <th rowspan="2">Nama Peralatan</th>
+                <th rowspan="2">No</th>
+                <th class="text-col" rowspan="2">Nama Peralatan</th>
                 <th rowspan="2" style="width: 72px;">Jumlah<br/>Satuan</th>
                 <th colspan="2" style="width: 86px;">Status</th>
                 <th colspan="2" style="width: 86px;">Kondisi</th>
-                <th rowspan="2" style="width: 120px;">Keterangan</th>
+                <th class="text-col" rowspan="2" style="width: 120px;">Keterangan</th>
               </tr>
               <tr>
                 <th style="width: 42px;">Ada</th>
@@ -1483,33 +1603,51 @@
             </tbody>
           </table>
 
-          <div style="margin-top: 10px; font-size: 9pt;">
+          <div style="margin-top: 4px; font-size: 7pt;">
             <table style="width: 100%; text-align: center;">
               <tr>
                 <td style="width: 50%; vertical-align: top;">
                   <div>Jakarta, ${tglStr}</div>
                   <div style="font-weight: bold;">Kepala Regu Naik Piket</div>
-                  <div style="height: 44px;"></div>
+                  ${sigNaik}
                   <div style="font-weight: bold; text-decoration: underline;">${naikNama}</div>
-                  <div style="text-align: left; padding-left: 36px; margin-top: 2px;">NIP/NRK : ${naikNip}</div>
                 </td>
                 <td style="width: 50%; vertical-align: top;">
                   <div>Jakarta, ${tglStr}</div>
                   <div style="font-weight: bold;">Kepala Regu Lepas Piket</div>
-                  <div style="height: 44px;"></div>
+                  ${sigLepas}
                   <div style="font-weight: bold; text-decoration: underline;">${lepasNama}</div>
-                  <div style="text-align: left; padding-left: 36px; margin-top: 2px;">NIP/NRK : ${lepasNip}</div>
                 </td>
               </tr>
             </table>
           </div>
         `;
       }
+      const extraPrint = `<div style="margin-top:4px;font-size:7pt;border:1px solid #999;padding:3px;white-space:pre-wrap;"><strong>KETERANGAN</strong><br>${escapeHtml(st.keteranganUmum || [st.catatanKondisiUnit, st.jurnalKegiatan].filter(Boolean).join('\n\n') || '-')}</div>`;
+      container.insertAdjacentHTML('beforeend', extraPrint);
     }
 
     function updateOutputs() {
       document.getElementById('waPreviewBox').textContent = generateWhatsAppText();
       renderOfficialPrintLayout();
+      updateWaActionAvailability();
+    }
+
+    function updateWaActionAvailability() {
+      const st=getActiveState(), total=st.items.length;
+      const checked=st.items.filter(item=>item.checked).length;
+      const ready=total>0 && checked===total;
+      const btn=document.getElementById('waActionBtn');
+      const label=document.getElementById('waActionLabel');
+      const hint=document.getElementById('waActionHint');
+      if(!btn)return;
+      btn.disabled=!ready;
+      btn.setAttribute('aria-disabled',String(!ready));
+      btn.className=ready
+        ? 'w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-sm'
+        : 'w-full py-3 px-4 rounded-xl bg-slate-300 text-slate-500 font-bold text-sm flex items-center justify-center gap-2 shadow-sm cursor-not-allowed';
+      if(label)label.textContent=ready?'Laporan WhatsApp':`Pemeriksaan ${checked}/${total} peralatan`;
+      if(hint)hint.textContent=ready?'Semua peralatan sudah diperiksa. Laporan siap disalin atau dikirim.':`Periksa seluruh peralatan terlebih dahulu (${checked} dari ${total} selesai).`;
     }
 
     // =========================================================================
@@ -1774,6 +1912,78 @@
       }
     }
 
+    function setupSignaturePad(canvasId, clearId, stateKey) {
+      const canvas=document.getElementById(canvasId), ctx=canvas.getContext('2d');
+      ctx.strokeStyle='#111827'; ctx.lineWidth=4; ctx.lineCap='round'; ctx.lineJoin='round';
+      const restore=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);const src=getActiveState()[stateKey];if(src){const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,canvas.width,canvas.height);im.src=src;}};
+      let drawing=false;
+      const pt=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height};};
+      canvas.addEventListener('pointerdown',e=>{if(!isCurrentShiftEditable())return;drawing=true;canvas.setPointerCapture(e.pointerId);const p=pt(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+      canvas.addEventListener('pointermove',e=>{if(!drawing)return;const p=pt(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+      const finish=()=>{if(!drawing)return;drawing=false;getActiveState()[stateKey]=canvas.toDataURL('image/png');saveActiveState();updateOutputs();};
+      canvas.addEventListener('pointerup',finish);canvas.addEventListener('pointercancel',finish);
+      document.getElementById(clearId).addEventListener('click',()=>{ctx.clearRect(0,0,canvas.width,canvas.height);getActiveState()[stateKey]='';saveActiveState();updateOutputs();});
+      canvas._restore=restore; restore();
+    }
+
+    async function downloadJpg(element, filename, scale=2) {
+      if(!window.html2canvas){showToast('Komponen JPG belum termuat; periksa koneksi internet.');return;}
+      const hasPages=element.querySelectorAll && element.querySelectorAll('.print-page').length>0;
+      const sources=hasPages ? Array.from(element.querySelectorAll('.print-page')) : [element];
+      const base=filename.replace(/\.jpg$/i,'');
+      for(let index=0; index<sources.length; index++){
+        const stage=document.createElement('div');
+        stage.style.cssText='position:fixed;left:-16000px;top:0;width:1123px;background:#fff;z-index:-1;';
+        const page=document.createElement('div');
+        page.className='report-export-page';
+        page.style.cssText='width:1123px;min-height:794px;padding:19px 25px;box-sizing:border-box;background:#fff;color:#111;font-family:Times New Roman,serif;font-size:9px;line-height:1.12;overflow:visible;';
+        page.innerHTML=sources[index].innerHTML;
+        const style=document.createElement('style');
+        style.textContent=`
+          .report-export-page,.report-export-page *{box-sizing:border-box;max-width:100%;font-family:"Times New Roman",serif!important}
+          .report-export-page table{border-collapse:collapse;width:100%;table-layout:fixed}
+          .report-export-page th,.report-export-page td{border:.55pt solid #667085!important;padding:3.2pt 5pt!important;font-size:7.4pt!important;line-height:1.18!important;vertical-align:middle!important;white-space:normal!important;overflow-wrap:break-word!important;word-break:normal!important}
+          .report-export-page th{background:#e9edf2!important;font-weight:bold!important;text-align:center!important}
+          .report-export-page td.text-col,.report-export-page th.text-col{text-align:left!important}
+          .report-export-page td.number-col,.report-export-page th.number-col{text-align:right!important;font-variant-numeric:tabular-nums}
+          .report-export-page td.center-col,.report-export-page th.center-col{text-align:center!important}
+          .report-export-page tr:nth-child(even){background:#f7f9fb}
+          .report-export-page img{max-height:34px!important;max-width:130px!important;object-fit:contain}
+          .report-export-page h1,.report-export-page h2{font-size:12pt!important;line-height:1.15!important;margin:0 0 4px!important;text-align:center}
+          .report-export-page h3{font-size:9pt!important;margin:3px 0 7px!important;text-align:center}
+          .report-export-page .official-table{width:100%!important;table-layout:fixed!important;margin:4px 0 0!important}
+          .report-export-page .print-page{padding:0!important;width:100%!important}
+        `;
+        stage.append(style,page);document.body.appendChild(stage);
+        try{
+          if(document.fonts&&document.fonts.ready) await document.fonts.ready;
+          await Promise.all(Array.from(page.querySelectorAll('img')).map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;})));
+          const canvas=await html2canvas(page,{scale:Math.max(2,scale),backgroundColor:'#ffffff',useCORS:true,allowTaint:false,logging:false,windowWidth:1123,scrollX:0,scrollY:0});
+          const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.97));
+          if(!blob)throw new Error('Gagal membuat gambar JPG.');
+          const url=URL.createObjectURL(blob),a=document.createElement('a');
+          a.href=url;a.download=sources.length>1?`${base}_Halaman_${index+1}.jpg`:`${base}.jpg`;
+          document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+        }finally{stage.remove();}
+        if(sources.length>1) await new Promise(resolve=>setTimeout(resolve,350));
+      }
+    }
+    function isProblemForRecord(i){return !!(i.checked&&(i.status==='tdk_ada'||i.condition==='rusak'));}
+    async function fetchMonthRecords(ym){
+      const [y,m]=ym.split('-').map(Number),start=ym+'-01',end=new Date(y,m,0).toISOString().slice(0,10);
+      const snap=await db.collection('ceklis_harian').where('tanggal','>=',start).where('tanggal','<=',end).get();
+      return snap.docs.map(d=>d.data()).filter(x=>x.unit_id===activeUnitId&&x.payload&&x.record_type!=='master').map(x=>x.payload).sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+    }
+    function monthTitle(ym){const [y,m]=ym.split('-').map(Number);return new Intl.DateTimeFormat('id-ID',{month:'long',year:'numeric'}).format(new Date(y,m-1,1));}
+    function monthlySummaryHtml(records,ym){
+      const cfg=getActiveConfig(),rows=records.map(st=>`<tr><td>${formatIndonesianDate(st.tanggal)}</td><td>${escapeHtml(st.regu||getGroupForDutyDate(st.tanggal))}</td><td>${st.items.filter(i=>i.checked&&!isProblemForRecord(i)).length}/${st.items.length}</td><td>${st.items.filter(isProblemForRecord).length}</td><td>${escapeHtml(st.karuNaikNama||'-')} / ${escapeHtml(st.karuLepasNama||'-')}</td><td>${escapeHtml(st.keteranganUmum||'').replace(/\n/g,' ').slice(0,90)}</td></tr>`).join('');
+      return `<div style="background:#fff;color:#111;padding:24px;width:1047px;max-width:1047px;box-sizing:border-box;font-family:Arial"><h2 style="text-align:center;margin:0">${escapeHtml(cfg.printTitle)}</h2><h3 style="text-align:center;margin:5px 0 16px">REKAPITULASI BULAN ${monthTitle(ym).toUpperCase()}</h3><p><b>Armada:</b> ${cfg.jenisKdo} (${cfg.tnkb}) &nbsp; <b>Pos:</b> ${cfg.pos}</p><table class="official-table table-six" style="font-size:10px"><colgroup><col style="width:13%"><col style="width:10%"><col style="width:14%"><col style="width:10%"><col style="width:22%"><col style="width:31%"></colgroup><thead><tr>${['Tanggal','Group','Baik / Dicek','Temuan','Karu Naik / Lepas','Keterangan'].map(x=>`<th style="border:1px solid #333;padding:6px;background:#eee">${x}</th>`).join('')}</tr></thead><tbody>${rows||'<tr><td colspan="6" style="border:1px solid #333;padding:8px">Belum ada data.</td></tr>'}</tbody></table><p style="font-size:11px">Jumlah lembar harian tersimpan: ${records.length}</p></div>`;
+    }
+    function monthlyDetailHtml(records){
+      const cfg=getActiveConfig();
+      return records.map(st=>{const rows=st.items.map((i,n)=>`<tr><td>${n+1}</td><td>${escapeHtml(i.name)}</td><td>${i.qty} ${escapeHtml(i.unit)}</td><td>${i.checked?(i.status==='tdk_ada'?'Tidak ada':'Ada'):''}</td><td>${i.checked?(i.condition==='rusak'?'Rusak':'Baik'):''}</td><td>${escapeHtml(i.note||'')}</td></tr>`).join('');return `<section class="print-page" style="padding:10mm;font-family:'Times New Roman',serif;color:#111"><h3 style="text-align:center">${escapeHtml(cfg.printTitle)}<br/>LEMBAR CEKLIS HARIAN</h3><p><b>Armada:</b> ${cfg.jenisKdo} (${cfg.tnkb}) &nbsp; <b>Tanggal:</b> ${formatIndonesianDate(st.tanggal)} &nbsp; <b>Group:</b> ${escapeHtml(st.regu||getGroupForDutyDate(st.tanggal))}</p><table class="official-table table-detail"><colgroup><col style="width:5%"><col style="width:30%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:26%"></colgroup><thead><tr><th>No</th><th>Nama Peralatan</th><th>Jumlah Standar</th><th>Status</th><th>Kondisi</th><th>Keterangan</th></tr></thead><tbody>${rows}</tbody></table><p style="border:1px solid #999;padding:7px;white-space:pre-wrap"><b>Keterangan:</b><br/>${escapeHtml(st.keteranganUmum||'-')}</p><table style="width:100%;text-align:center;margin-top:16px"><tr><td style="width:50%">Kepala Regu Naik Piket<br/><img style="height:48px;max-width:180px" src="${st.tandaTanganNaik||''}"/><br/><b>${escapeHtml(st.karuNaikNama||'')}</b></td><td>Kepala Regu Lepas Piket<br/><img style="height:48px;max-width:180px" src="${st.tandaTanganLepas||''}"/><br/><b>${escapeHtml(st.karuLepasNama||'')}</b></td></tr></table></section>`;}).join('');
+    }
+
     // =========================================================================
     // 11. INISIALISASI EVENT LISTENERS
     // =========================================================================
@@ -1781,19 +1991,24 @@
       detectUnitFromURL();
       syncUrlParam(activeUnitId);
 
+      // Penguncian sisi aplikasi: periode selain shift aktif hanya dapat dibaca.
+      const isAllowedWhileLocked = el => !!(el.closest('#inputTanggal') || el.closest('#searchInput') || el.closest('#clearSearchBtn') || el.closest('.filter-btn') || el.closest('#resetFilterBtn') || el.closest('#unitSelector') || el.closest('#openQrModalBtn') || el.closest('#copyWaBtn') || el.closest('#sendWaBtn') || el.closest('#printPdfBtn') || el.closest('#qrModal'));
+      ['click','input','change'].forEach(evt => document.addEventListener(evt, e => {
+        if (isCurrentShiftEditable() || isAllowedWhileLocked(e.target)) return;
+        if (e.target.closest('#metaFormContainer') || e.target.closest('#equipmentList') || e.target.closest('#markAllNormalBtn') || e.target.closest('#resetChecklistBtn') || e.target.closest('#addEquipmentBtn') || e.target.closest('#generalRemarks')) {
+          e.preventDefault(); e.stopImmediatePropagation(); showToast('Laporan terkunci. Data hanya dapat dilihat.');
+        }
+      }, true));
+
+
       // Mulai sinkronisasi harian real-time Firebase untuk hari ini
-      listenDailyData(activeUnitId, getTodayISO());
+      Promise.all(Object.keys(UNITS_CONFIG).map(loadStandardOverrides)).then(() => listenDailyData(activeUnitId, getCurrentDutyDateISO()));
 
       // Pemilih Multi-Unit (Dropdown & Pill)
       document.getElementById('unitSelector').addEventListener('change', (e) => {
         switchUnit(e.target.value);
       });
 
-      document.querySelectorAll('.unit-pill-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          switchUnit(btn.dataset.unitPill);
-        });
-      });
 
       // Toggle kartu data piket
       document.getElementById('toggleMetaBtn').addEventListener('click', () => {
@@ -1819,7 +2034,7 @@
       document.querySelectorAll('.regu-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const st = getActiveState();
-          st.regu = btn.dataset.regu;
+          st.regu = getGroupForDutyDate(st.tanggal);
           saveActiveState();
           renderHeaderAndMeta();
           updateOutputs();
@@ -1835,9 +2050,26 @@
         });
       };
       bindMeta('karuNaikNama', 'karuNaikNama');
-      bindMeta('karuNaikNip', 'karuNaikNip');
       bindMeta('karuLepasNama', 'karuLepasNama');
-      bindMeta('karuLepasNip', 'karuLepasNip');
+      setupSignaturePad('karuNaikSignature','clearKaruNaikSignature','tandaTanganNaik');
+      setupSignaturePad('karuLepasSignature','clearKaruLepasSignature','tandaTanganLepas');
+      document.getElementById('generalRemarks').addEventListener('input', e => {
+        if (!isCurrentShiftEditable()) return;
+        getActiveState().keteranganUmum = e.target.value;
+        saveActiveState(); updateOutputs();
+      });
+      document.getElementById('addEquipmentBtn').addEventListener('click', () => {
+        if (!isCurrentShiftEditable()) return;
+        const nameEl = document.getElementById('newEquipmentName');
+        const qtyEl = document.getElementById('newEquipmentQty');
+        const name = nameEl.value.trim(); const qty = Math.max(1, parseInt(qtyEl.value, 10) || 1);
+        if (!name) { showToast('Masukkan nama peralatan terlebih dahulu.'); return; }
+        const st = getActiveState(); const id = Math.max(0, ...st.items.map(i => Number(i.id) || 0)) + 1;
+        const newItem = { id, name, qty, unit: 'Buah', checked: false, status: 'ada', condition: 'baik', goodQty: qty, badQty: 0, note: '', showNote: false, custom: true };
+        st.items.push(newItem); getActiveConfig().items.push({...newItem});
+        nameEl.value = ''; qtyEl.value = '1'; saveActiveState(); updateStatsAndProgress(); renderEquipmentList(); updateOutputs();
+        saveMasterData(activeUnitId).then(()=>showToast(`Peralatan "${name}" ditambahkan dan tersinkron ke cloud.`)).catch(e=>showToast(`Tersimpan di HP, cloud menolak: ${e.code || e.message}`));
+      });
 
       // Tombol Cepat: Semua Normal (Baik & Ada)
       document.getElementById('markAllNormalBtn').addEventListener('click', () => {
@@ -1951,32 +2183,69 @@
       });
 
       document.getElementById('downloadQrSvgBtn').addEventListener('click', () => {
-        const svgContent = document.getElementById('qrSvgContainer').innerHTML;
-        const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `QR_Damkar_Sektor5_${qrModalUnitId}.svg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showToast(`QR Code ${qrModalUnitId} diunduh!`);
+        const svgNode = document.querySelector('#qrSvgContainer svg');
+        if (!svgNode) { showToast('QR belum siap diunduh.'); return; }
+        const svgContent = new XMLSerializer().serializeToString(svgNode);
+        const svgBlob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+        const svgUrl = URL.createObjectURL(svgBlob);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 1200;
+          const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,1200,1200);
+          ctx.imageSmoothingEnabled = false; ctx.drawImage(img, 40, 40, 1120, 1120);
+          canvas.toBlob(jpgBlob => {
+            URL.revokeObjectURL(svgUrl);
+            if (!jpgBlob) { showToast('Gagal membuat JPG.'); return; }
+            const jpgUrl = URL.createObjectURL(jpgBlob); const a = document.createElement('a');
+            a.href = jpgUrl; a.download = `QR_Damkar_Sektor5_${qrModalUnitId}.jpg`;
+            document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(jpgUrl), 1000);
+            showToast(`QR JPG ${qrModalUnitId} berhasil diunduh!`);
+          }, 'image/jpeg', 0.96);
+        };
+        img.onerror = () => { URL.revokeObjectURL(svgUrl); showToast('Gagal memproses QR JPG.'); };
+        img.src = svgUrl;
       });
 
-      // Aksi Laporan Sticky Footer (Salin WA, Kirim WA, Cetak / PDF)
-      document.getElementById('copyWaBtn').addEventListener('click', () => {
-        copyTextSafe(generateWhatsAppText(), 'Laporan WA berhasil disalin!');
+      // Satu tombol WhatsApp membuka pilihan salin atau kirim.
+      const waModal = document.getElementById('waActionModal');
+      document.getElementById('waActionBtn').addEventListener('click', () => {
+        if(document.getElementById('waActionBtn').disabled){showToast('Periksa semua peralatan sebelum mengirim laporan WhatsApp.');return;}
+        waModal.classList.remove('hidden');
       });
+      document.getElementById('closeWaActionModal').addEventListener('click', () => waModal.classList.add('hidden'));
+      waModal.addEventListener('click', e => { if (e.target === waModal) waModal.classList.add('hidden'); });
+      document.getElementById('copyWaBtn').addEventListener('click', () => { copyTextSafe(generateWhatsAppText(), 'Laporan WA berhasil disalin!'); waModal.classList.add('hidden'); });
+      document.getElementById('sendWaBtn').addEventListener('click', () => { const encoded=encodeURIComponent(generateWhatsAppText()); window.open(`https://api.whatsapp.com/send?text=${encoded}`,'_blank','noopener,noreferrer'); waModal.classList.add('hidden'); });
 
-      document.getElementById('sendWaBtn').addEventListener('click', () => {
-        const encoded = encodeURIComponent(generateWhatsAppText());
-        window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener,noreferrer');
-      });
-
-      document.getElementById('printPdfBtn').addEventListener('click', () => {
-        renderOfficialPrintLayout();
-        window.print();
+      document.getElementById('printMonth').value = new Date().toISOString().slice(0,7);
+      const scopeEl=document.getElementById('downloadScope'), formatEl=document.getElementById('downloadFormat');
+      const syncDownloadOptions=()=>{const monthly=scopeEl.value==='monthly';document.getElementById('downloadDailyOptions').classList.toggle('hidden',monthly);document.getElementById('downloadMonthlyOptions').classList.toggle('hidden',!monthly);};
+      scopeEl.addEventListener('change',syncDownloadOptions); syncDownloadOptions();
+      document.getElementById('downloadReportBtn').addEventListener('click', async()=>{
+        const scope=scopeEl.value, format=formatEl.value, pc=document.getElementById('printContainer');
+        const ym=document.getElementById('printMonth').value;
+        try {
+          if(scope==='daily') {
+            renderOfficialPrintLayout(); pc.classList.remove('hidden');
+            if(format==='jpg') await downloadJpg(pc,`Ceklis_Harian_${activeUnitId}_${getActiveState().tanggal}.jpg`,2);
+            else { await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))); window.print(); }
+            pc.classList.add('hidden');
+            return;
+          }
+          if(!ym) return showToast('Pilih bulan terlebih dahulu.');
+          const records=await fetchMonthRecords(ym), mode=document.getElementById('monthlyMode').value;
+          if(mode==='summary') {
+            const wrap=document.createElement('div'); wrap.innerHTML=monthlySummaryHtml(records,ym); wrap.style.position='fixed'; wrap.style.left='-12000px'; wrap.style.top='0'; document.body.appendChild(wrap);
+            if(format==='jpg') await downloadJpg(wrap.firstElementChild,`Rekap_Bulanan_${activeUnitId}_${ym}.jpg`,2);
+            else { pc.innerHTML=wrap.innerHTML; pc.classList.remove('hidden'); window.print(); pc.classList.add('hidden'); }
+            wrap.remove();
+          } else {
+            pc.innerHTML=monthlyDetailHtml(records); pc.classList.remove('hidden');
+            if(format==='jpg') await downloadJpg(pc,`Rincian_Bulanan_${activeUnitId}_${ym}.jpg`,1.25);
+            else { await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))); window.print(); }
+            pc.classList.add('hidden'); renderOfficialPrintLayout();
+          }
+        } catch(e) { console.error('Gagal mengunduh laporan:',e); showToast(`Gagal mengunduh: ${e.code || e.message || 'periksa koneksi'}`); pc.classList.add('hidden'); }
       });
     });
   </script>
