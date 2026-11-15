@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Ceklis Timbang Terima Damkar Sektor 5 Cempaka Putih</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDK (Compat v10) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+      background-color: #F1F5F9;
+    }
+
+    /* Sembunyikan scrollbar horizontal pada tab filter */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Gaya khusus Cetak / Simpan PDF (Menyerupai Formulir Resmi Dinas) */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm 12mm;
+      }
+      body {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        font-family: 'Times New Roman', Times, serif !important;
+        font-size: 9.5pt !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      table.official-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 6px;
+      }
+      table.official-table th,
+      table.official-table td {
+        border: 1px solid #000000;
+        padding: 2.5px 5px;
+        font-size: 8.8pt;
+        line-height: 1.2;
+      }
+      table.official-table th {
+        background-color: #E5E7EB !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        font-weight: bold;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased pb-28">
+
+  <!-- ===================================================================== -->
+  <!-- ANTARMUKA APLIKASI MOBILE-FIRST (NO-PRINT)                            -->
+  <!-- ===================================================================== -->
+  <div class="no-print max-w-2xl mx-auto">
+
+    <!-- HEADER MERAH DAMKAR PROFESIONAL + PEMILIH MULTI-UNIT -->
+    <header class="bg-gradient-to-br from-red-800 via-red-700 to-red-900 text-white px-4 pt-4 pb-5 rounded-b-3xl shadow-lg relative overflow-hidden">
+      <!-- Dekorasi Latar Halus -->
+      <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full pointer-events-none"></div>
+      <div class="absolute left-1/3 -bottom-12 w-32 h-32 bg-amber-400/10 rounded-full pointer-events-none"></div>
+
+      <!-- Baris Identitas Instansi & Tombol QR Code -->
+      <div class="flex items-start justify-between gap-3 relative z-10">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-amber-400 text-red-950 flex items-center justify-center shadow-md shrink-0">
+            <!-- Ikon Perisai Api SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 15c-2.21 0-4-1.79-4-4 0-1.66 1.34-3.66 4-6 2.66 2.34 4 4.34 4 6 0 2.21-1.79 4-4 4z"/>
+            </svg>
+          </div>
+          <div>
+            <span class="inline-block text-[10px] font-bold tracking-wider uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full">
+              Sektor 5 Cempaka Putih
+            </span>
+            <h1 class="text-base sm:text-lg font-extrabold leading-tight tracking-tight mt-0.5">
+              E-Ceklis Timbang Terima Damkar
+            </h1>
+          </div>
+        </div>
+
+        <!-- Tombol QR Code Unit -->
+        <button type="button" id="openQrModalBtn" class="bg-white/15 hover:bg-white/25 active:scale-95 border border-white/25 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+          </svg>
+          <span>QR Code Unit</span>
+        </button>
+      </div>
+
+      <!-- Dropdown Pemilih Unit Armada -->
+      <div class="mt-4 relative z-10">
+        <label for="unitSelector" class="block text-[11px] font-semibold text-red-100 uppercase tracking-wider mb-1">
+          Pilih Armada / Unit Operasional:
+        </label>
+        <div class="relative">
+          <select id="unitSelector" class="w-full appearance-none bg-slate-950/90 text-white border-2 border-amber-400/70 rounded-2xl pl-3.5 pr-10 py-3 text-xs sm:text-sm font-bold shadow-md focus:outline-none focus:ring-2 focus:ring-amber-300 cursor-pointer">
+            <option value="B9006PHA">UNIT 1: Medium Pressure — B 9006 PHA</option>
+            <option value="B9636PHA">UNIT 2: Light Fire Truck Challenger 2500L — B 9636 PHA</option>
+          </select>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+
+        <!-- Quick Switch Pill Tabs -->
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <button type="button" data-unit-pill="B9006PHA" class="unit-pill-btn py-1.5 px-2.5 rounded-xl text-[11px] font-bold border transition text-center truncate">
+            🚒 B 9006 PHA (Medium)
+          </button>
+          <button type="button" data-unit-pill="B9636PHA" class="unit-pill-btn py-1.5 px-2.5 rounded-xl text-[11px] font-bold border transition text-center truncate">
+            🚒 B 9636 PHA (Light 2500L)
+          </button>
+        </div>
+      </div>
+
+      <!-- Info Lokasi & Status Auto-Sync Cloud -->
+      <div class="mt-3.5 pt-3 border-t border-white/15 flex flex-wrap items-center justify-between gap-2 text-[11px] text-red-100 relative z-10">
+        <span id="headerUnitSubtitle" class="font-medium truncate">
+          Pos Cempaka Putih Barat &bull; Medium Pressure
+        </span>
+        <span class="flex items-center gap-1.5 bg-black/30 px-2.5 py-0.5 rounded-full shrink-0">
+          <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span id="saveStatusText">Menghubungkan Cloud...</span>
+        </span>
+      </div>
+    </header>
+
+    <!-- STICKY RINGKASAN STATISTIK & PROGRESS BAR PENGECEKAN -->
+    <div class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm px-4 py-2.5 space-y-2">
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="bg-slate-100 rounded-xl py-1.5 px-2">
+          <div class="text-[10px] font-semibold text-slate-500 uppercase">Total Item</div>
+          <div id="statTotal" class="font-mono font-extrabold text-sm sm:text-base text-slate-800">35</div>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl py-1.5 px-2">
+          <div class="text-[10px] font-semibold text-emerald-700 uppercase">Baik / Lengkap</div>
+          <div id="statGood" class="font-mono font-extrabold text-sm sm:text-base text-emerald-700">0</div>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl py-1.5 px-2">
+          <div class="text-[10px] font-semibold text-red-700 uppercase">Rusak / Tdk Ada</div>
+          <div id="statBad" class="font-mono font-extrabold text-sm sm:text-base text-red-600">0</div>
+        </div>
+      </div>
+
+      <!-- Progress Bar Pengecekan -->
+      <div>
+        <div class="flex items-center justify-between text-[11px] font-bold mb-1">
+          <span class="text-slate-600">Progres Pemeriksaan: <span id="progressCountText" class="font-mono text-slate-900">0/35</span> Item</span>
+          <span id="progressPercentText" class="font-mono text-red-700">0%</span>
+        </div>
+        <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div id="progressBarFill" class="h-full bg-gradient-to-r from-red-600 to-emerald-500 rounded-full transition-all duration-300" style="width: 0%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <main class="px-4 pt-4 space-y-4">
+
+      <!-- KARTU DATA PIKET (COLLAPSIBLE / RAPI) -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+        <button type="button" id="toggleMetaBtn" class="w-full flex items-center justify-between text-left">
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs shrink-0">1</span>
+            <div>
+              <h2 class="font-bold text-slate-800 text-sm sm:text-base">Data Piket & Petugas Pemeriksa</h2>
+              <p id="metaSummaryPreview" class="text-xs text-slate-500">Tanggal, Hari, Group & Kepala Regu</p>
+            </div>
+          </div>
+          <svg id="metaChevron" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-400 transition-transform duration-200 rotate-180 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <div id="metaFormContainer" class="mt-4 pt-4 border-t border-slate-100 space-y-3.5">
+          <!-- Tanggal & Hari -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label for="inputTanggal" class="block text-xs font-semibold text-slate-600 mb-1">Tanggal</label>
+              <input type="date" id="inputTanggal" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-600" />
+            </div>
+            <div>
+              <label for="inputHari" class="block text-xs font-semibold text-slate-600 mb-1">Hari</label>
+              <input type="text" id="inputHari" placeholder="Otomatis dari tanggal" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-600" />
+            </div>
+          </div>
+
+          <!-- Pilihan Group / Regu -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Group / Regu Piket</label>
+            <div class="grid grid-cols-3 gap-2" id="reguSelector">
+              <button type="button" data-regu="Group A" class="regu-btn py-2.5 px-2 rounded-xl text-xs font-bold border transition-all">Group A</button>
+              <button type="button" data-regu="Group B" class="regu-btn py-2.5 px-2 rounded-xl text-xs font-bold border transition-all">Group B</button>
+              <button type="button" data-regu="Group C" class="regu-btn py-2.5 px-2 rounded-xl text-xs font-bold border transition-all">Group C</button>
+            </div>
+          </div>
+
+          <!-- Kepala Regu Naik Piket -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-2.5">
+            <div class="text-xs font-bold text-red-700 uppercase tracking-wide">Kepala Regu Naik Piket (Menerima)</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label for="karuNaikNama" class="block text-[11px] font-medium text-slate-600 mb-1">Nama Lengkap</label>
+                <input type="text" id="karuNaikNama" placeholder="Nama Karu Naik Piket" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600" />
+              </div>
+              <div>
+                <label for="karuNaikNip" class="block text-[11px] font-medium text-slate-600 mb-1">NIP / NRK</label>
+                <input type="text" id="karuNaikNip" placeholder="Masukkan NIP / NRK" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-600" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Kepala Regu Lepas Piket -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-2.5">
+            <div class="text-xs font-bold text-slate-700 uppercase tracking-wide">Kepala Regu Lepas Piket (Menyerahkan)</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label for="karuLepasNama" class="block text-[11px] font-medium text-slate-600 mb-1">Nama Lengkap</label>
+                <input type="text" id="karuLepasNama" placeholder="Nama Karu Lepas Piket" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600" />
+              </div>
+              <div>
+                <label for="karuLepasNip" class="block text-[11px] font-medium text-slate-600 mb-1">NIP / NRK</label>
+                <input type="text" id="karuLepasNip" placeholder="Masukkan NIP / NRK" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOMBOL CEPAT, PENCARIAN & FILTER -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs shrink-0">2</span>
+          <div>
+            <h2 class="font-bold text-slate-800 text-sm sm:text-base">Daftar Pemeriksaan Peralatan</h2>
+            <p class="text-[11px] text-slate-500">Tersinkron otomatis antar HP secara real-time</p>
+          </div>
+        </div>
+
+        <!-- Aksi Cepat 1-Klik -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <button type="button" id="markAllNormalBtn" class="sm:col-span-2 py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Semua Normal (Baik &amp; Ada)</span>
+          </button>
+
+          <button type="button" id="resetChecklistBtn" class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 border border-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Reset Ceklis</span>
+          </button>
+        </div>
+
+        <!-- Pencarian Nama Alat -->
+        <div class="relative">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" id="searchInput" placeholder="Cari alat (misal: Selang, SCBA, Nozzle, APAR, Ganco)..." class="w-full rounded-xl border border-slate-300 pl-10 pr-9 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-600" />
+          <button type="button" id="clearSearchBtn" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-xs font-bold flex items-center justify-center">
+            &times;
+          </button>
+        </div>
+
+        <!-- Filter Tab -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-0.5">
+          <button type="button" data-filter="all" class="filter-btn px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition">
+            Semua (<span id="filterAllCount">35</span>)
+          </button>
+          <button type="button" data-filter="problem" class="filter-btn px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition">
+            Bermasalah / Rusak / Tdk Ada (<span id="filterProblemCount">0</span>)
+          </button>
+          <button type="button" data-filter="unchecked" class="filter-btn px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition">
+            Belum Dicek (<span id="filterUncheckedCount">35</span>)
+          </button>
+        </div>
+      </section>
+
+      <!-- DAFTAR KARTU ITEM PERALATAN -->
+      <section id="equipmentList" class="space-y-2.5">
+        <!-- Dirender dinamis oleh JavaScript sesuai Unit aktif -->
+      </section>
+
+      <!-- TAMPILAN JIKA HASIL FILTER / PENCARIAN KOSONG -->
+      <div id="emptyState" class="hidden bg-white rounded-2xl border border-slate-200 p-8 text-center">
+        <p class="text-sm font-semibold text-slate-600">Tidak ada peralatan yang cocok dengan filter saat ini.</p>
+        <button type="button" id="resetFilterBtn" class="mt-3 text-xs font-bold text-red-700 bg-red-50 px-4 py-2 rounded-xl border border-red-200">
+          Tampilkan Semua Peralatan
+        </button>
+      </div>
+
+      <!-- PREVIEW TEKS LAPORAN WHATSAPP -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs shrink-0">3</span>
+            <div>
+              <h2 class="font-bold text-slate-800 text-sm">Pratinjau Laporan Grup WA</h2>
+              <p class="text-[11px] text-slate-500">Terformat otomatis sesuai data di atas</p>
+            </div>
+          </div>
+        </div>
+        <div id="waPreviewBox" class="bg-slate-900 text-slate-100 rounded-xl p-3.5 font-mono text-[11px] sm:text-xs leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto border border-slate-700"></div>
+      </section>
+
+    </main>
+
+    <!-- =================================================================== -->
+    <!-- STICKY FOOTER AKSI LAPORAN (SALIN WA, KIRIM WA, CETAK / PDF)        -->
+    <!-- =================================================================== -->
+    <footer class="fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2.5 shadow-[0_-4px_14px_rgba(0,0,0,0.08)]">
+      <div class="max-w-2xl mx-auto grid grid-cols-3 gap-2">
+        <button type="button" id="copyWaBtn" class="py-2.5 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 active:scale-97 text-white font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 shadow-xs transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <span>Salin Laporan WA</span>
+        </button>
+
+        <button type="button" id="sendWaBtn" class="py-2.5 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-97 text-white font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 shadow-xs transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"/>
+          </svg>
+          <span>Kirim WA</span>
+        </button>
+
+        <button type="button" id="printPdfBtn" class="py-2.5 px-2.5 rounded-xl bg-red-700 hover:bg-red-800 active:scale-97 text-white font-bold text-[11px] sm:text-xs flex items-center justify-center gap-1.5 shadow-xs transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
+          <span>Cetak / PDF</span>
+        </button>
+      </div>
+    </footer>
+
+    <!-- =================================================================== -->
+    <!-- MODAL QR CODE UNIT (UNTUK TEMPEL DI KOMPARTEMEN ARMADA)             -->
+    <!-- =================================================================== -->
+    <div id="qrModal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 px-2 py-0.5 rounded-full">Stiker Kompartemen</span>
+            <h3 class="font-extrabold text-slate-900 text-base mt-0.5">QR Code Akses Cepat Unit</h3>
+          </div>
+          <button type="button" id="closeQrModalBtn" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center">
+            &times;
+          </button>
+        </div>
+
+        <!-- Tab Pilih Unit di dalam Modal QR -->
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <button type="button" data-qr-unit="B9006PHA" class="qr-tab-btn py-2 px-2.5 rounded-xl text-xs font-bold border transition">
+            B 9006 PHA (Medium)
+          </button>
+          <button type="button" data-qr-unit="B9636PHA" class="qr-tab-btn py-2 px-2.5 rounded-xl text-xs font-bold border transition">
+            B 9636 PHA (Light 2500L)
+          </button>
+        </div>
+
+        <!-- Kartu Stiker QR Siap Scan / Screenshot -->
+        <div class="mt-4 bg-gradient-to-b from-red-800 to-red-900 p-4 rounded-2xl text-white text-center shadow-inner">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-amber-300">GULKARMAT SEKTOR 5 CEMPAKA PUTIH</div>
+          <div id="qrStickerTitle" class="font-extrabold text-sm mt-0.5">UNIT MEDIUM PRESSURE</div>
+          <div id="qrStickerPlate" class="inline-block font-mono font-extrabold text-base bg-slate-950 text-amber-400 border border-slate-400 px-3 py-0.5 rounded-lg mt-1.5">
+            B 9006 PHA
+          </div>
+
+          <!-- Kontainer SVG QR Code -->
+          <div class="bg-white p-3.5 rounded-2xl inline-block mt-3 shadow-md">
+            <div id="qrSvgContainer" class="w-44 h-44 flex items-center justify-center"></div>
+          </div>
+
+          <p class="text-[11px] text-red-100 mt-2.5 font-medium">
+            Scan QR Code ini menggunakan kamera HP saat apel timbang terima piket
+          </p>
+        </div>
+
+        <!-- Pengaturan Domain / URL Base -->
+        <div class="mt-3.5 space-y-2">
+          <label for="qrBaseUrlInput" class="block text-[11px] font-bold text-slate-600">
+            Link URL Aplikasi (Otomatis terdeteksi atau sesuaikan link hosting):
+          </label>
+          <input type="text" id="qrBaseUrlInput" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-600" />
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button type="button" id="copyQrLinkBtn" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs flex items-center justify-center gap-1.5">
+              Salin Link Unit
+            </button>
+            <button type="button" id="downloadQrSvgBtn" class="py-2.5 px-3 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs flex items-center justify-center gap-1.5">
+              Unduh Gambar QR
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL KONFIRMASI RESET CEKLIS (PENGGANTI confirm())                 -->
+    <!-- =================================================================== -->
+    <div id="confirmModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl border border-slate-200">
+        <h3 class="font-extrabold text-slate-900 text-base">Reset Ceklis Unit Ini?</h3>
+        <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+          Seluruh tanda pemeriksaan dan catatan kerusakan pada <strong id="confirmUnitName">unit aktif</strong> untuk tanggal terpilih akan dikembalikan ke status awal (belum dicek) di semua HP.
+        </p>
+        <div class="grid grid-cols-2 gap-2.5 mt-4">
+          <button type="button" id="cancelResetBtn" class="py-2.5 px-3 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-50">
+            Batal
+          </button>
+          <button type="button" id="confirmResetBtn" class="py-2.5 px-3 rounded-xl bg-red-700 text-white font-bold text-xs hover:bg-red-800">
+            Ya, Reset Ceklis
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFIKASI (PENGGANTI alert()) -->
+    <div id="toastNotification" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2">
+      <div class="bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 border border-slate-700 whitespace-nowrap">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span id="toastMessage">Notifikasi</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TAMPILAN CETAK RESMI / PDF (PRINT-ONLY - DINAMIS SESUAI UNIT AKTIF)   -->
+  <!-- ===================================================================== -->
+  <div id="printContainer" class="print-only hidden">
+    <!-- Konten cetak resmi dirender dinamis oleh JavaScript sesuai Unit 1 atau Unit 2 -->
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- LOGIKA JAVASCRIPT MULTI-UNIT, FIREBASE REALTIME SYNC & PRINT ENGINE   -->
+  <!-- ===================================================================== -->
+  <script>
+    // =========================================================================
+    // 0. KONFIGURASI FIREBASE REALTIME CLOUD SYNC
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBimeaTmU3lvSZPu12YRKQNEkKQDLsjRk",
+      authDomain: "pemeriksaan-kelengkapan-unit.firebaseapp.com",
+      projectId: "pemeriksaan-kelengkapan-unit",
+      storageBucket: "pemeriksaan-kelengkapan-unit.firebasestorage.app",
+      messagingSenderId: "202555551426",
+      appId: "1:202555551426:web:6e6153d105f00d3167955b"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let syncTimer = null;
+    let unsubscribeLive = null;
+    let isRemoteUpdate = false;
+
+    // =========================================================================
+    // 1. MASTER DATA KONFIGURASI MULTI-UNIT
+    // =========================================================================
+    const UNITS_CONFIG = {
+      B9006PHA: {
+        id: 'B9006PHA',
+        shortLabel: 'Unit Medium Pressure (B 9006 PHA)',
+        printTitle: 'DATA UNIT MEDIUM PRESSURE',
+        jenisKdo: 'Unit Medium Pressure',
+        tnkb: 'B 9006 PHA',
+        kantorUpt: 'KANTOR SEKTOR 5 CEMPAKA PUTIH',
+        pos: 'CEMPAKA PUTIH BARAT',
+        skpd: 'Dinas Penanggulangan Kebakaran dan Penyelamatan Provinsi DKI Jakarta',
+        formType: 'medium_pressure',
+        items: [
+          { id: 1, name: 'Selang 2.5" Inch Kanvas', qty: 17, unit: 'ROLL' },
+          { id: 2, name: 'Selang 1.5" Inch Kanvas', qty: 1, unit: 'ROLL' },
+          { id: 3, name: 'Selang 2.5" Inch Karet', qty: 6, unit: 'ROLL' },
+          { id: 4, name: 'Selang 1.5" Inch Karet', qty: 5, unit: 'ROLL' },
+          { id: 5, name: 'Selang Hisap 4" Inch', qty: 4, unit: 'BUAH' },
+          { id: 6, name: 'Pemancar 2.5" Inch (Gun/Selectable/Variable Nozzle)', qty: 1, unit: 'BUAH' },
+          { id: 7, name: 'Pemancar 1.5" Inch (Gun/Selectable/Variable Nozzle)', qty: 1, unit: 'BUAH' },
+          { id: 8, name: 'Pemancar 2.5" Inch (Branch Type/Jet)', qty: 1, unit: 'BUAH' },
+          { id: 9, name: 'Pemancar 1.5" Inch (Branch Pipe/Jet)', qty: 3, unit: 'BUAH' },
+          { id: 10, name: 'Pemancar Typol 2.5" Inch', qty: 1, unit: 'BUAH' },
+          { id: 11, name: 'Pipa Cabang 2,5 x 2,5 x 2,5 Inch', qty: 2, unit: 'BUAH' },
+          { id: 12, name: 'Pipa Cabang 2,5 x 1,5 x 1,5 Inch', qty: 2, unit: 'BUAH' },
+          { id: 13, name: 'Kopling antara VHD Ke Machine', qty: 2, unit: 'BUAH' },
+          { id: 14, name: 'Kopling Machine 2,5 Inch', qty: 2, unit: 'BUAH' },
+          { id: 15, name: 'Adaptor Kopling Hisap 4 Inch', qty: 1, unit: 'BUAH' },
+          { id: 16, name: 'Fire Helmet', qty: 1, unit: 'BUAH' },
+          { id: 17, name: 'Blok lalu lintas', qty: 5, unit: 'BUAH' },
+          { id: 18, name: 'Tangga', qty: 1, unit: 'BUAH' },
+          { id: 19, name: 'Breathing Apparatus (SCBA)', qty: 2, unit: 'SET' },
+          { id: 20, name: 'Bolt Cutter Manual', qty: 1, unit: 'BUAH' },
+          { id: 21, name: 'Kunci Selang Hisap', qty: 2, unit: 'BUAH' },
+          { id: 22, name: 'Kunci Hydrant', qty: 1, unit: 'BUAH' },
+          { id: 23, name: 'Traffic Cone (Kerucut)', qty: 2, unit: 'BUAH' },
+          { id: 24, name: 'Masker Canester (Drager)', qty: 2, unit: 'BUAH' },
+          { id: 25, name: 'APAR', qty: 2, unit: 'TABUNG' },
+          { id: 26, name: 'Kapak Besar', qty: 1, unit: 'BUAH' },
+          { id: 27, name: 'Linggis', qty: 1, unit: 'BUAH' },
+          { id: 28, name: 'Sekop', qty: 1, unit: 'BUAH' },
+          { id: 29, name: 'Tambang', qty: 2, unit: 'BUAH' },
+          { id: 30, name: 'Ganjal Ban', qty: 3, unit: 'BUAH' },
+          { id: 31, name: 'Typol', qty: 6, unit: 'DIRIGEN' },
+          { id: 32, name: 'Clamp Selang', qty: 12, unit: 'BUAH' },
+          { id: 33, name: 'Ban Serep', qty: 1, unit: 'BUAH' },
+          { id: 34, name: 'Sarung tangan (Fire Gloves)', qty: 7, unit: 'BUAH' },
+          { id: 35, name: 'Radio Rig', qty: 1, unit: 'BUAH' }
+        ]
+      },
+      B9636PHA: {
+        id: 'B9636PHA',
+        shortLabel: 'Unit Pompa Light Fire Truck Challenger 2500L (B 9636 PHA)',
+        printTitle: 'DAFTAR PEMELIHARAAN DAN PEMERIKSAAN PERALATAN OPERASIONAL',
+        printSubtitle: 'UNIT KENDARAAN OPERASIONAL PENANGGULANGAN KEBAKARAN DAN PENYELAMATAN',
+        jenisKdo: 'Unit Pompa Light Fire Truck Challenger 2500L',
+        tnkb: 'B 9636 PHA',
+        pos: 'Kelurahan Cempaka Putih Barat',
+        kantorUpt: 'Sektor V Kecamatan Cempaka Putih',
+        skpd: 'Suku Dinas Penanggulangan Kebakaran dan Penyelamatan Kota Administrasi Jakarta Pusat Provinsi DKI Jakarta',
+        formType: 'light_challenger',
+        items: [
+          { id: 1, name: 'Selang Penyalur 2.5" VDH Coupling', qty: 9, unit: 'Roll' },
+          { id: 2, name: 'Selang Penyalur 1.5" VDH Coupling', qty: 6, unit: 'Roll' },
+          { id: 3, name: 'Selang Penghisap 4" Storz Coupling', qty: 2, unit: 'Buah' },
+          { id: 4, name: 'Pipa Cabang 2.5"x2.5"x2.5" VDH Coupling', qty: 1, unit: 'Buah' },
+          { id: 5, name: 'Pipa Cabang 2.5"x1.5"x1.5" VDH Coupling', qty: 1, unit: 'Buah' },
+          { id: 6, name: 'Pipa Pemancar Variable GUN 2.5" VDH Coupling', qty: 2, unit: 'Buah' },
+          { id: 7, name: 'Pipa Pemancar Variable GUN 1.5" VDH Coupling', qty: 2, unit: 'Buah' },
+          { id: 8, name: 'Pipa Pemancar Variable 1.5" VDH Coupling', qty: 1, unit: 'Buah' },
+          { id: 9, name: 'Pipa Pemancar Jet&Spray 1.5" VDH Coupling', qty: 1, unit: 'Buah' },
+          { id: 10, name: 'Alat Bantu Pernafasan / SCBA Dragger Air Boss', qty: 2, unit: 'Set' },
+          { id: 11, name: 'Alat Pemadam Api Ringan DCP Gunebo 3Kg', qty: 2, unit: 'Buah' },
+          { id: 12, name: 'Alat Pemadam Api Ringan DCP Challenger 9Kg', qty: 1, unit: 'Buah' },
+          { id: 13, name: 'Kapak Besar', qty: 1, unit: 'Buah' },
+          { id: 14, name: 'Linggis', qty: 1, unit: 'Buah' },
+          { id: 15, name: 'Ganco', qty: 1, unit: 'Buah' },
+          { id: 16, name: 'Tangga', qty: 1, unit: 'Buah' },
+          { id: 17, name: 'Adaptor VDH x Machino Coupling', qty: 1, unit: 'Buah' },
+          { id: 18, name: 'Saringan Selang Hisap Storz Coupling', qty: 1, unit: 'Buah' },
+          { id: 19, name: 'Tali Dadung 20M', qty: 1, unit: 'Roll' },
+          { id: 20, name: 'Kunci Tanki Foam Liquit', qty: 2, unit: 'Buah' },
+          { id: 21, name: 'Kunci hydrant', qty: 2, unit: 'Buah' },
+          { id: 22, name: 'Kerucut Pengaman Lalu Lintas', qty: 2, unit: 'Buah' },
+          { id: 23, name: 'Segitiga Pengaman Lalu Lintas', qty: 2, unit: 'Buah' },
+          { id: 24, name: 'Kunci Perkakas Roda', qty: 1, unit: 'Set' },
+          { id: 25, name: 'Dongkrak', qty: 1, unit: 'Buah' },
+          { id: 26, name: 'Acu Charger', qty: 1, unit: 'Set' },
+          { id: 27, name: 'Ban Cadangan', qty: 1, unit: 'Buah' },
+          { id: 28, name: 'Lampu Emergency Portable', qty: 1, unit: 'Buah' },
+          { id: 29, name: 'Lampu Rotary + Modul', qty: 1, unit: 'Set' },
+          { id: 30, name: 'Lampu Sorot Belakang', qty: 2, unit: 'Buah' },
+          { id: 31, name: 'Radio Rig', qty: 1, unit: 'Buah' },
+          { id: 32, name: 'Radio Tape', qty: 1, unit: 'Buah' },
+          { id: 33, name: 'Sirene', qty: 1, unit: 'Buah' },
+          { id: 34, name: 'Sling WARM + Remote', qty: 1, unit: 'Set' },
+          { id: 35, name: 'Kotak P3K', qty: 1, unit: 'Buah' }
+        ]
+      }
+    };
+
+    const STORAGE_PREFIX = 'gulkarmat_sektor5_cloud_v2_';
+
+    // =========================================================================
+    // 2. UTILITAS TANGGAL, HARI & FORMAT TEKS
+    // =========================================================================
+    function getTodayISO() {
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      return new Date(now.getTime() - offset).toISOString().split('T')[0];
+    }
+
+    function getIndonesianDayName(isoString) {
+      if (!isoString) return '';
+      try {
+        const [year, month, day] = isoString.split('-').map(Number);
+        const dateObj = new Date(year, month - 1, day);
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        return days[dateObj.getDay()] || '';
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function formatIndonesianDate(isoString) {
+      if (!isoString) return '.............................. 2026';
+      try {
+        const [year, month, day] = isoString.split('-').map(Number);
+        const months = [
+          'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        return `${day} ${months[month - 1]} ${year}`;
+      } catch (e) {
+        return isoString;
+      }
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function setSyncBadge(state, text) {
+      const statusEl = document.getElementById('saveStatusText');
+      const dotEl = document.getElementById('syncDot');
+      if (statusEl) statusEl.textContent = text;
+      if (!dotEl) return;
+
+      dotEl.className = 'w-2 h-2 rounded-full shrink-0 ';
+      if (state === 'synced') {
+        dotEl.className += 'bg-emerald-400 animate-pulse';
+      } else if (state === 'syncing') {
+        dotEl.className += 'bg-amber-400 animate-ping';
+      } else {
+        dotEl.className += 'bg-red-400';
+      }
+    }
+
+    // =========================================================================
+    // 3. STATE APLIKASI PER UNIT & SINKRONISASI HARIAN FIREBASE
+    // =========================================================================
+    let activeUnitId = 'B9006PHA';
+    let qrModalUnitId = 'B9006PHA';
+    let currentFilter = 'all';
+    let searchQuery = '';
+    let toastTimer = null;
+
+    function createInitialUnitState(unitId, targetDate) {
+      const cfg = UNITS_CONFIG[unitId];
+      const tgl = targetDate || getTodayISO();
+      return {
+        tanggal: tgl,
+        hari: getIndonesianDayName(tgl),
+        regu: 'Group A',
+        karuNaikNama: '',
+        karuNaikNip: '',
+        karuLepasNama: '',
+        karuLepasNip: '',
+        items: cfg.items.map(eq => ({
+          ...eq,
+          checked: false,
+          status: 'ada',
+          condition: 'baik',
+          goodQty: eq.qty,
+          badQty: 0,
+          note: '',
+          showNote: false
+        }))
+      };
+    }
+
+    let unitStates = {
+      B9006PHA: createInitialUnitState('B9006PHA'),
+      B9636PHA: createInitialUnitState('B9636PHA')
+    };
+
+    function getActiveConfig() {
+      return UNITS_CONFIG[activeUnitId];
+    }
+
+    function getActiveState() {
+      return unitStates[activeUnitId];
+    }
+
+    function getDailyDocId(unitId, tanggal) {
+      return `${tanggal}_${unitId}`;
+    }
+
+    // Simpan otomatis ke Cloud Firestore & cadangan localStorage
+    function saveActiveState() {
+      if (isRemoteUpdate) return;
+      const st = getActiveState();
+      const docId = getDailyDocId(activeUnitId, st.tanggal);
+
+      try {
+        localStorage.setItem(STORAGE_PREFIX + docId, JSON.stringify(st));
+      } catch (err) {}
+
+      setSyncBadge('syncing', 'Menyinkronkan...');
+
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(async () => {
+        try {
+          await db.collection('ceklis_harian').doc(docId).set({
+            unit_id: activeUnitId,
+            tanggal: st.tanggal,
+            payload: st,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          setSyncBadge('synced', `Tersinkron (${activeUnitId})`);
+        } catch (err) {
+          console.error('Gagal sinkron ke Firebase:', err);
+          setSyncBadge('offline', 'Offline (Tersimpan di HP)');
+        }
+      }, 500);
+    }
+
+    // Dengarkan perubahan data secara real-time berdasarkan Unit & Tanggal aktif
+    function listenDailyData(unitId, tanggal) {
+      if (unsubscribeLive) {
+        unsubscribeLive();
+        unsubscribeLive = null;
+      }
+
+      const docId = getDailyDocId(unitId, tanggal);
+      setSyncBadge('syncing', 'Memuat data...');
+
+      try {
+        const cached = localStorage.getItem(STORAGE_PREFIX + docId);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && Array.isArray(parsed.items)) {
+            unitStates[unitId] = parsed;
+          }
+        } else {
+          unitStates[unitId] = createInitialUnitState(unitId, tanggal);
+        }
+      } catch (e) {
+        unitStates[unitId] = createInitialUnitState(unitId, tanggal);
+      }
+
+      renderHeaderAndMeta();
+      updateStatsAndProgress();
+      renderEquipmentList();
+      updateOutputs();
+
+      unsubscribeLive = db.collection('ceklis_harian').doc(docId).onSnapshot(
+        (doc) => {
+          if (doc.metadata.hasPendingWrites) return;
+
+          isRemoteUpdate = true;
+          if (doc.exists && doc.data() && doc.data().payload) {
+            const remoteData = doc.data().payload;
+            const currentItems = unitStates[unitId].items;
+            if (Array.isArray(remoteData.items) && remoteData.items.length === currentItems.length) {
+              remoteData.items.forEach((rItem, idx) => {
+                rItem.showNote = currentItems[idx].showNote || false;
+              });
+              unitStates[unitId] = remoteData;
+              try {
+                localStorage.setItem(STORAGE_PREFIX + docId, JSON.stringify(remoteData));
+              } catch (e) {}
+            }
+          } else {
+            unitStates[unitId] = createInitialUnitState(unitId, tanggal);
+          }
+
+          renderHeaderAndMeta();
+          updateStatsAndProgress();
+          renderEquipmentList();
+          updateOutputs();
+          setSyncBadge('synced', `Tersinkron (${unitId})`);
+          isRemoteUpdate = false;
+        },
+        (error) => {
+          console.error('Firestore listener error:', error);
+          setSyncBadge('offline', 'Mode Offline (Cek Rules/Sinyal)');
+          isRemoteUpdate = false;
+        }
+      );
+    }
+
+    // Pantau pergantian hari otomatis saat tengah malam (00:00) jika halaman dibiarkan terbuka
+    let lastKnownToday = getTodayISO();
+    setInterval(() => {
+      const currentToday = getTodayISO();
+      if (currentToday !== lastKnownToday) {
+        const prevToday = lastKnownToday;
+        lastKnownToday = currentToday;
+        if (getActiveState().tanggal === prevToday) {
+          listenDailyData(activeUnitId, currentToday);
+          showToast('Hari berganti: Lembar ceklis baru disiapkan otomatis');
+        }
+      }
+    }, 30000);
+
+    function detectUnitFromURL() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const paramUnit = (params.get('unit') || '').toUpperCase().replace(/\s+/g, '');
+        if (UNITS_CONFIG[paramUnit]) {
+          activeUnitId = paramUnit;
+          qrModalUnitId = paramUnit;
+        }
+      } catch (e) {}
+    }
+
+    function syncUrlParam(unitId) {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('unit', unitId);
+        window.history.replaceState({}, '', url.toString());
+      } catch (e) {}
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toastNotification');
+      const msgEl = document.getElementById('toastMessage');
+      msgEl.textContent = message;
+
+      toast.classList.remove('opacity-0', '-translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-2');
+      }, 2500);
+    }
+
+    // =========================================================================
+    // 4. SINKRONISASI UI HEADER, FORM DATA PIKET & STATISTIK
+    // =========================================================================
+    function switchUnit(newUnitId) {
+      if (!UNITS_CONFIG[newUnitId]) return;
+      const currentDate = getActiveState().tanggal || getTodayISO();
+      activeUnitId = newUnitId;
+      qrModalUnitId = newUnitId;
+      syncUrlParam(newUnitId);
+      listenDailyData(newUnitId, currentDate);
+      showToast(`Beralih ke ${UNITS_CONFIG[newUnitId].tnkb}`);
+    }
+
+    function renderHeaderAndMeta() {
+      const cfg = getActiveConfig();
+      const st = getActiveState();
+
+      document.getElementById('unitSelector').value = activeUnitId;
+      document.getElementById('headerUnitSubtitle').textContent = `${cfg.pos} • ${cfg.jenisKdo}`;
+
+      document.querySelectorAll('.unit-pill-btn').forEach(btn => {
+        const isCurrent = btn.dataset.unitPill === activeUnitId;
+        if (isCurrent) {
+          btn.className = 'unit-pill-btn py-1.5 px-2.5 rounded-xl text-[11px] font-bold border bg-amber-400 text-red-950 border-amber-300 shadow-xs transition text-center truncate';
+        } else {
+          btn.className = 'unit-pill-btn py-1.5 px-2.5 rounded-xl text-[11px] font-bold border bg-black/25 text-red-100 border-white/15 hover:bg-black/35 transition text-center truncate';
+        }
+      });
+
+      document.getElementById('inputTanggal').value = st.tanggal;
+      document.getElementById('inputHari').value = st.hari;
+
+      const activeEl = document.activeElement;
+      if (activeEl?.id !== 'karuNaikNama') document.getElementById('karuNaikNama').value = st.karuNaikNama;
+      if (activeEl?.id !== 'karuNaikNip') document.getElementById('karuNaikNip').value = st.karuNaikNip;
+      if (activeEl?.id !== 'karuLepasNama') document.getElementById('karuLepasNama').value = st.karuLepasNama;
+      if (activeEl?.id !== 'karuLepasNip') document.getElementById('karuLepasNip').value = st.karuLepasNip;
+
+      document.querySelectorAll('.regu-btn').forEach(btn => {
+        const selected = btn.dataset.regu === st.regu;
+        btn.className = selected
+          ? 'regu-btn py-2.5 px-2 rounded-xl text-xs font-bold border bg-red-700 text-white border-red-700 shadow-xs transition-all'
+          : 'regu-btn py-2.5 px-2 rounded-xl text-xs font-bold border bg-white text-slate-700 border-slate-300 hover:bg-slate-50 transition-all';
+      });
+
+      const dayText = st.hari ? `${st.hari}, ` : '';
+      document.getElementById('metaSummaryPreview').textContent = `${dayText}${formatIndonesianDate(st.tanggal)} • ${st.regu}`;
+    }
+
+    function isItemProblematic(item) {
+      if (!item.checked) return false;
+      if (activeUnitId === 'B9006PHA') {
+        return item.condition === 'rusak';
+      } else {
+        return item.status === 'tdk_ada' || item.condition === 'rusak';
+      }
+    }
+
+    function updateStatsAndProgress() {
+      const st = getActiveState();
+      const total = st.items.length;
+      const checkedCount = st.items.filter(i => i.checked).length;
+      const uncheckedCount = total - checkedCount;
+      const problemCount = st.items.filter(i => isItemProblematic(i)).length;
+      const goodCount = st.items.filter(i => i.checked && !isItemProblematic(i)).length;
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statGood').textContent = goodCount;
+      document.getElementById('statBad').textContent = problemCount;
+
+      const pct = total > 0 ? Math.round((checkedCount / total) * 100) : 0;
+      document.getElementById('progressCountText').textContent = `${checkedCount}/${total}`;
+      document.getElementById('progressPercentText').textContent = `${pct}%`;
+      document.getElementById('progressBarFill').style.width = `${pct}%`;
+
+      document.getElementById('filterAllCount').textContent = total;
+      document.getElementById('filterProblemCount').textContent = problemCount;
+      document.getElementById('filterUncheckedCount').textContent = uncheckedCount;
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        const active = btn.dataset.filter === currentFilter;
+        btn.className = active
+          ? 'filter-btn px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-900 text-white shadow-xs transition'
+          : 'filter-btn px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
+      });
+    }
+
+    // =========================================================================
+    // 5. RENDER KARTU ITEM PERALATAN (UNIT 1 vs UNIT 2)
+    // =========================================================================
+    function renderEquipmentList() {
+      const st = getActiveState();
+      const container = document.getElementById('equipmentList');
+      const emptyState = document.getElementById('emptyState');
+
+      const filtered = st.items.filter(item => {
+        const prob = isItemProblematic(item);
+        const matchesFilter =
+          currentFilter === 'all' ||
+          (currentFilter === 'problem' && prob) ||
+          (currentFilter === 'unchecked' && !item.checked);
+
+        const matchesSearch =
+          !searchQuery ||
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          String(item.id).includes(searchQuery);
+
+        return matchesFilter && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      const quickTags = ['Bocor', 'Pecah/Retak', 'Hilang/Kurang', 'Perlu Servis', 'Kadaluarsa'];
+
+      container.innerHTML = filtered.map(item => {
+        const prob = isItemProblematic(item);
+        const isGoodChecked = item.checked && !prob;
+
+        let cardClass = 'border-slate-200 bg-white';
+        let badgeClass = 'bg-slate-100 text-slate-700';
+        let statusTagHtml = `<span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Belum dicek</span>`;
+
+        if (prob) {
+          cardClass = 'border-red-300 bg-red-50/40 ring-1 ring-red-200';
+          badgeClass = 'bg-red-600 text-white';
+          statusTagHtml = `<span class="text-[10px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">Bermasalah</span>`;
+        } else if (isGoodChecked) {
+          cardClass = 'border-emerald-200 bg-emerald-50/20';
+          badgeClass = 'bg-emerald-600 text-white';
+          statusTagHtml = `<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">✓ Normal</span>`;
+        }
+
+        let controlsHtml = '';
+        if (activeUnitId === 'B9006PHA') {
+          const baikActive = item.checked && item.condition === 'baik';
+          const rusakActive = item.checked && item.condition === 'rusak';
+
+          controlsHtml = `
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <button type="button" onclick="setUnit1Condition(${item.id}, 'baik')" class="min-h-[42px] px-3 py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 transition active:scale-97 ${
+                baikActive
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-emerald-50'
+              }">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+                Baik (${item.qty})
+              </button>
+
+              <button type="button" onclick="setUnit1Condition(${item.id}, 'rusak')" class="min-h-[42px] px-3 py-2 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 transition active:scale-97 ${
+                rusakActive
+                  ? 'bg-red-600 text-white border-red-600 shadow-xs'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-red-50'
+              }">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Rusak
+              </button>
+            </div>
+          `;
+        } else {
+          const adaActive = item.checked && item.status === 'ada';
+          const tdkAdaActive = item.checked && item.status === 'tdk_ada';
+          const baikActive = item.checked && item.status === 'ada' && item.condition === 'baik';
+          const rusakActive = item.checked && item.status === 'ada' && item.condition === 'rusak';
+
+          controlsHtml = `
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">
+              <div class="bg-slate-50 p-2 rounded-xl border border-slate-200/80">
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Status Keberadaan</div>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button type="button" onclick="setUnit2Status(${item.id}, 'ada')" class="min-h-[38px] px-2 py-1.5 rounded-lg border text-xs font-extrabold transition active:scale-97 ${
+                    adaActive
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-emerald-50'
+                  }">
+                    Ada
+                  </button>
+                  <button type="button" onclick="setUnit2Status(${item.id}, 'tdk_ada')" class="min-h-[38px] px-2 py-1.5 rounded-lg border text-xs font-extrabold transition active:scale-97 ${
+                    tdkAdaActive
+                      ? 'bg-red-600 text-white border-red-600 shadow-2xs'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-red-50'
+                  }">
+                    Tdk Ada
+                  </button>
+                </div>
+              </div>
+
+              <div class="bg-slate-50 p-2 rounded-xl border border-slate-200/80 ${tdkAdaActive ? 'opacity-50' : ''}">
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Kondisi Fisik</div>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button type="button" onclick="setUnit2Condition(${item.id}, 'baik')" class="min-h-[38px] px-2 py-1.5 rounded-lg border text-xs font-extrabold transition active:scale-97 ${
+                    baikActive
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-emerald-50'
+                  }">
+                    Baik
+                  </button>
+                  <button type="button" onclick="setUnit2Condition(${item.id}, 'rusak')" class="min-h-[38px] px-2 py-1.5 rounded-lg border text-xs font-extrabold transition active:scale-97 ${
+                    rusakActive
+                      ? 'bg-red-600 text-white border-red-600 shadow-2xs'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-red-50'
+                  }">
+                    Rusak
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        const showDetailPanel = prob || item.showNote || (item.note && item.note.trim().length > 0);
+
+        return `
+          <article class="rounded-2xl border p-3.5 shadow-2xs transition-all ${cardClass}">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-start gap-2.5 min-w-0">
+                <span class="font-mono text-xs font-extrabold px-2 py-1 rounded-lg shrink-0 mt-0.5 ${badgeClass}">
+                  ${String(item.id).padStart(2, '0')}
+                </span>
+                <div class="min-w-0">
+                  <h3 class="font-bold text-slate-900 text-sm leading-snug break-words">
+                    ${escapeHtml(item.name)}
+                  </h3>
+                  <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
+                      Standar: <strong class="font-mono text-slate-900">${item.qty} ${escapeHtml(item.unit)}</strong>
+                    </span>
+                    ${statusTagHtml}
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" onclick="toggleNoteField(${item.id})" title="Tambah/Edit Keterangan" class="text-[11px] font-semibold text-slate-500 hover:text-slate-800 bg-slate-100 px-2 py-1 rounded-lg shrink-0">
+                ${showDetailPanel && !prob ? 'Tutup Ket.' : '+ Ket.'}
+              </button>
+            </div>
+
+            ${controlsHtml}
+
+            ${showDetailPanel ? `
+              <div class="mt-3 pt-3 border-t ${prob ? 'border-red-200' : 'border-slate-200'} space-y-2.5">
+                ${(activeUnitId === 'B9006PHA' && prob) ? `
+                  <div class="flex items-center justify-between gap-2 bg-white p-2.5 rounded-xl border border-red-200">
+                    <div>
+                      <div class="text-[11px] font-bold text-slate-700">Rincian Jumlah Baik vs Rusak</div>
+                      <div class="text-[11px] text-red-600 font-semibold">
+                        Rusak: <span class="font-mono font-bold">${item.badQty} ${escapeHtml(item.unit)}</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button type="button" onclick="adjustUnit1GoodQty(${item.id}, -1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 font-extrabold text-sm border border-slate-300">-</button>
+                      <span class="font-mono font-extrabold text-sm w-7 text-center">${item.goodQty}</span>
+                      <button type="button" onclick="adjustUnit1GoodQty(${item.id}, 1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 font-extrabold text-sm border border-slate-300">+</button>
+                    </div>
+                  </div>
+                ` : ''}
+
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-700 mb-1">Keterangan</label>
+                  ${prob ? `
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                      ${quickTags.map(tag => `
+                        <button type="button" onclick="appendQuickNote(${item.id}, '${tag}')" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-white hover:bg-red-50 text-slate-700 border border-slate-300">
+                          + ${tag}
+                        </button>
+                      `).join('')}
+                    </div>
+                  ` : ''}
+                  <input type="text" value="${escapeHtml(item.note)}" oninput="updateItemNote(${item.id}, this.value)" placeholder="Tulis keterangan kondisi alat..." class="w-full rounded-xl border ${prob ? 'border-red-300' : 'border-slate-300'} bg-white px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-600" />
+                </div>
+              </div>
+            ` : ''}
+          </article>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // 6. AKSI INTERAKSI ITEM PERALATAN
+    // =========================================================================
+    window.setUnit1Condition = function(id, cond) {
+      const item = getActiveState().items.find(i => i.id === id);
+      if (!item) return;
+      item.checked = true;
+      item.status = 'ada';
+      item.condition = cond;
+      if (cond === 'baik') {
+        item.goodQty = item.qty;
+        item.badQty = 0;
+      } else {
+        if (item.badQty === 0) {
+          item.badQty = 1;
+          item.goodQty = Math.max(0, item.qty - 1);
+        }
+      }
+      saveActiveState();
+      updateStatsAndProgress();
+      renderEquipmentList();
+      updateOutputs();
+    };
+
+    window.adjustUnit1GoodQty = function(id, delta) {
+      const item = getActiveState().items.find(i => i.id === id);
+      if (!item) return;
+      const maxGood = Math.max(0, item.qty - 1);
+      item.goodQty = Math.min(maxGood, Math.max(0, item.goodQty + delta));
+      item.badQty = item.qty - item.goodQty;
+      saveActiveState();
+      renderEquipmentList();
+      updateOutputs();
+    };
+
+    window.setUnit2Status = function(id, status) {
+      const item = getActiveState().items.find(i => i.id === id);
+      if (!item) return;
+      item.checked = true;
+      item.status = status;
+      if (status === 'tdk_ada') {
+        item.condition = 'none';
+      } else if (item.condition === 'none') {
+        item.condition = 'baik';
+      }
+      saveActiveState();
+      updateStatsAndProgress();
+      renderEquipmentList();
+      updateOutputs();
+    };
+
+    window.setUnit2Condition = function(id, cond) {
+      const item = getActiveState().items.find(i => i.id === id);
+      if (!item) return;
+      item.checked = true;
+      item.status = 'ada';
+      item.condition = cond;
+      saveActiveState();
+      updateStatsAndProgress();
+      renderEquipmentList();
+      updateOutputs();
+    };
+
+    window.toggleNoteField = function(id) {
+      const item = getActiveState().items.find(i => i.id === id);
+      if (!item) return;
+      item.showNote = !item.showNote;
+      renderEquipmentList();
+    };
+
+    window.appendQuickNote = function(id, tag) {
+      const item = getActiveState().items.find(i => i.id === id);
+      if (!item) return;
+      if (!item.note.trim()) {
+        item.note = tag;
+      } else if (!item.note.toLowerCase().includes(tag.toLowerCase())) {
+        item.note = `${item.note.trim()}, ${tag}`;
+      }
+      saveActiveState();
+      renderEquipmentList();
+      updateOutputs();
+    };
+
+    window.updateItemNote = function(id, val) {
+      const item = getActiveState().items.find(i => i.id === id);
+      if (!item) return;
+      item.note = val;
+      saveActiveState();
+      updateOutputs();
+    };
+
+    // =========================================================================
+    // 7. GENERATOR LAPORAN WHATSAPP & CETAK FORMULIR RESMI (PDF / PRINT)
+    // =========================================================================
+    function generateWhatsAppText() {
+      const cfg = getActiveConfig();
+      const st = getActiveState();
+
+      const total = st.items.length;
+      const problems = st.items.filter(i => isItemProblematic(i));
+      const goodCount = st.items.filter(i => i.checked && !isItemProblematic(i)).length;
+      const uncheckedCount = st.items.filter(i => !i.checked).length;
+
+      const dayPrefix = st.hari.trim() ? `${st.hari.trim()}, ` : '';
+      const tglFormatted = `${dayPrefix}${formatIndonesianDate(st.tanggal)}`;
+      const karuNaik = st.karuNaikNama.trim() || '-';
+      const nipNaik = st.karuNaikNip.trim() || '-';
+      const karuLepas = st.karuLepasNama.trim() || '-';
+      const nipLepas = st.karuLepasNip.trim() || '-';
+
+      let lines = [
+        `*LAPORAN TIMBANG TERIMA PERALATAN*`,
+        `*${cfg.jenisKdo.toUpperCase()} (${cfg.tnkb})*`,
+        `${cfg.kantorUpt} - ${cfg.pos}`,
+        ``,
+        `📅 *Hari/Tanggal:* ${tglFormatted}`,
+        `🚒 *Group / Regu:* ${st.regu}`,
+        `📊 *Hasil Ceklis:* ${goodCount}/${total} Item Baik & Lengkap` + (uncheckedCount > 0 ? ` (${uncheckedCount} belum dicek)` : ``),
+        ``
+      ];
+
+      if (problems.length === 0) {
+        lines.push(`✅ *STATUS PERALATAN:*`);
+        lines.push(`Seluruh peralatan yang diperiksa dalam keadaan ADA, LENGKAP, dan BAIK (Siap Operasional).`);
+      } else {
+        lines.push(`⚠️ *CATATAN TEMUAN / BERMASALAH (${problems.length} Item):*`);
+        problems.forEach((item, idx) => {
+          const ket = item.note.trim() ? ` — _Ket: ${item.note.trim()}_` : '';
+          if (activeUnitId === 'B9006PHA') {
+            lines.push(
+              `${idx + 1}. *${item.name}* (Standar: ${item.qty} ${item.unit}) -> Baik: ${item.goodQty}, Rusak: *${item.badQty} ${item.unit}*${ket}`
+            );
+          } else {
+            const labelMasalah = item.status === 'tdk_ada' ? 'TIDAK ADA' : 'ADA - KONDISI RUSAK';
+            lines.push(
+              `${idx + 1}. *${item.name}* (${item.qty} ${item.unit}) -> *${labelMasalah}*${ket}`
+            );
+          }
+        });
+      }
+
+      const goodWithNotes = st.items.filter(i => i.checked && !isItemProblematic(i) && i.note.trim());
+      if (goodWithNotes.length > 0) {
+        lines.push(``);
+        lines.push(`📝 *Catatan Tambahan:*`);
+        goodWithNotes.forEach(item => {
+          lines.push(`• ${item.name}: _${item.note.trim()}_`);
+        });
+      }
+
+      const labelKaruNaik = activeUnitId === 'B9006PHA' ? 'Karu Piket' : 'Karu Naik Piket';
+      lines.push(``);
+      lines.push(`*Yang Memeriksa:*`);
+      lines.push(`• *${labelKaruNaik}:* ${karuNaik} (NIP/NRK: ${nipNaik})`);
+      lines.push(`• *Karu Lepas Piket:* ${karuLepas} (NIP/NRK: ${nipLepas})`);
+
+      return lines.join('\n');
+    }
+
+    function renderOfficialPrintLayout() {
+      const cfg = getActiveConfig();
+      const st = getActiveState();
+      const container = document.getElementById('printContainer');
+
+      const tglStr = formatIndonesianDate(st.tanggal);
+      const naikNama = st.karuNaikNama.trim() ? `( ${escapeHtml(st.karuNaikNama.trim())} )` : '( ........................................ )';
+      const lepasNama = st.karuLepasNama.trim() ? `( ${escapeHtml(st.karuLepasNama.trim())} )` : '( ........................................ )';
+      const naikNip = escapeHtml(st.karuNaikNip.trim());
+      const lepasNip = escapeHtml(st.karuLepasNip.trim());
+
+      if (activeUnitId === 'B9006PHA') {
+        const rowsHtml = st.items.map(item => {
+          let baikVal = '';
+          let rusakVal = '';
+          if (item.checked) {
+            if (item.condition === 'baik') {
+              baikVal = item.qty;
+              rusakVal = '-';
+            } else {
+              baikVal = item.goodQty;
+              rusakVal = item.badQty;
+            }
+          }
+          const ketVal = item.note.trim() ? escapeHtml(item.note.trim()) : (item.checked && item.condition === 'baik' ? 'Baik' : '');
+          return `
+            <tr>
+              <td style="text-align: center;">${item.id}.</td>
+              <td>${escapeHtml(item.name)}</td>
+              <td style="text-align: center;">${item.qty}</td>
+              <td style="text-align: center;">${escapeHtml(item.unit)}</td>
+              <td style="text-align: center;">${baikVal}</td>
+              <td style="text-align: center;">${rusakVal}</td>
+              <td>${ketVal}</td>
+            </tr>
+          `;
+        }).join('');
+
+        container.innerHTML = `
+          <div style="text-align: center; font-weight: bold; font-size: 12pt; margin-bottom: 8px; letter-spacing: 0.4px;">
+            ${cfg.printTitle}
+          </div>
+
+          <table style="width: 100%; margin-bottom: 6px; font-size: 9.5pt; font-weight: bold;">
+            <tr>
+              <td style="width: 115px;">NOPOL</td>
+              <td style="width: 10px;">:</td>
+              <td>${cfg.tnkb}</td>
+              <td style="text-align: right;">GROUP / REGU : ${escapeHtml(st.regu.toUpperCase())}</td>
+            </tr>
+            <tr>
+              <td>SEKTOR</td>
+              <td>:</td>
+              <td colspan="2">${cfg.kantorUpt}</td>
+            </tr>
+            <tr>
+              <td>POS</td>
+              <td>:</td>
+              <td colspan="2">${cfg.pos}</td>
+            </tr>
+          </table>
+
+          <table class="official-table">
+            <thead>
+              <tr>
+                <th style="width: 30px;">NO.</th>
+                <th>NAMA PERALATAN</th>
+                <th style="width: 54px;">JUMLAH</th>
+                <th style="width: 60px;">SATUAN</th>
+                <th style="width: 48px;">BAIK</th>
+                <th style="width: 50px;">RUSAK</th>
+                <th style="width: 140px;">KETERANGAN</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+
+          <div style="margin-top: 12px; font-size: 9.5pt;">
+            <div style="text-align: right; margin-bottom: 4px;">
+              Jakarta, ${tglStr}
+            </div>
+            <div style="text-align: center; margin-bottom: 8px;">
+              Yang Memeriksa,
+            </div>
+            <table style="width: 100%; text-align: center;">
+              <tr>
+                <td style="width: 50%; vertical-align: top;">
+                  <div style="font-weight: bold;">Kepala Regu Piket</div>
+                  <div style="height: 48px;"></div>
+                  <div style="font-weight: bold; text-decoration: underline;">${naikNama}</div>
+                  <div style="text-align: left; padding-left: 44px; margin-top: 2px;">NIP. ${naikNip}</div>
+                </td>
+                <td style="width: 50%; vertical-align: top;">
+                  <div style="font-weight: bold;">Kepala Regu Lepas Piket</div>
+                  <div style="height: 48px;"></div>
+                  <div style="font-weight: bold; text-decoration: underline;">${lepasNama}</div>
+                  <div style="text-align: left; padding-left: 44px; margin-top: 2px;">NIP. ${lepasNip}</div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        `;
+      } else {
+        const rowsHtml = st.items.map(item => {
+          const checkAda = item.checked && item.status === 'ada' ? '✓' : '';
+          const checkTdkAda = item.checked && item.status === 'tdk_ada' ? '✓' : '';
+          const checkBaik = item.checked && item.status === 'ada' && item.condition === 'baik' ? '✓' : '';
+          const checkRusak = item.checked && item.status === 'ada' && item.condition === 'rusak' ? '✓' : '';
+          const ketVal = escapeHtml(item.note.trim());
+
+          return `
+            <tr>
+              <td style="text-align: center;">${item.id}</td>
+              <td>${escapeHtml(item.name)}</td>
+              <td style="text-align: center;">${item.qty} ${escapeHtml(item.unit)}</td>
+              <td style="text-align: center; font-weight: bold;">${checkAda}</td>
+              <td style="text-align: center; font-weight: bold;">${checkTdkAda}</td>
+              <td style="text-align: center; font-weight: bold;">${checkBaik}</td>
+              <td style="text-align: center; font-weight: bold;">${checkRusak}</td>
+              <td>${ketVal}</td>
+            </tr>
+          `;
+        }).join('');
+
+        const blankRowsHtml = [36, 37, 38, 39, 40].map(num => `
+          <tr>
+            <td style="text-align: center;">${num}</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+        `).join('');
+
+        container.innerHTML = `
+          <div style="text-align: center; font-weight: bold; font-size: 10.5pt; line-height: 1.3; margin-bottom: 8px;">
+            <div>${cfg.printTitle}</div>
+            <div>${cfg.printSubtitle}</div>
+          </div>
+
+          <table style="width: 100%; font-size: 8.5pt; margin-bottom: 6px; vertical-align: top;">
+            <tr>
+              <td style="width: 65%; vertical-align: top;">
+                <table style="width: 100%; line-height: 1.25;">
+                  <tr><td style="width: 68px;">Jenis KDO</td><td style="width: 8px;">:</td><td><strong>${cfg.jenisKdo}</strong></td></tr>
+                  <tr><td>No.Unit</td><td>:</td><td>-</td></tr>
+                  <tr><td>TNKB</td><td>:</td><td><strong>${cfg.tnkb}</strong></td></tr>
+                  <tr><td>Pos</td><td>:</td><td>${cfg.pos}</td></tr>
+                  <tr><td>UPT</td><td>:</td><td>${cfg.kantorUpt}</td></tr>
+                  <tr><td style="vertical-align: top;">SKPD</td><td style="vertical-align: top;">:</td><td>${cfg.skpd}</td></tr>
+                </table>
+              </td>
+              <td style="width: 35%; vertical-align: top; padding-left: 12px;">
+                <table style="width: 100%; line-height: 1.35;">
+                  <tr><td style="width: 72px;">Hari</td><td style="width: 8px;">:</td><td>${escapeHtml(st.hari)}</td></tr>
+                  <tr><td>Tgl/Bln/Thn</td><td>:</td><td>${tglStr}</td></tr>
+                  <tr><td>Group</td><td>:</td><td>${escapeHtml(st.regu)}</td></tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <table class="official-table">
+            <thead>
+              <tr>
+                <th rowspan="2" style="width: 26px;">No</th>
+                <th rowspan="2">Nama Peralatan</th>
+                <th rowspan="2" style="width: 72px;">Jumlah<br/>Satuan</th>
+                <th colspan="2" style="width: 86px;">Status</th>
+                <th colspan="2" style="width: 86px;">Kondisi</th>
+                <th rowspan="2" style="width: 120px;">Keterangan</th>
+              </tr>
+              <tr>
+                <th style="width: 42px;">Ada</th>
+                <th style="width: 44px;">Tdk Ada</th>
+                <th style="width: 42px;">Baik</th>
+                <th style="width: 44px;">Rusak</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+              ${blankRowsHtml}
+            </tbody>
+          </table>
+
+          <div style="margin-top: 10px; font-size: 9pt;">
+            <table style="width: 100%; text-align: center;">
+              <tr>
+                <td style="width: 50%; vertical-align: top;">
+                  <div>Jakarta, ${tglStr}</div>
+                  <div style="font-weight: bold;">Kepala Regu Naik Piket</div>
+                  <div style="height: 44px;"></div>
+                  <div style="font-weight: bold; text-decoration: underline;">${naikNama}</div>
+                  <div style="text-align: left; padding-left: 36px; margin-top: 2px;">NIP/NRK : ${naikNip}</div>
+                </td>
+                <td style="width: 50%; vertical-align: top;">
+                  <div>Jakarta, ${tglStr}</div>
+                  <div style="font-weight: bold;">Kepala Regu Lepas Piket</div>
+                  <div style="height: 44px;"></div>
+                  <div style="font-weight: bold; text-decoration: underline;">${lepasNama}</div>
+                  <div style="text-align: left; padding-left: 36px; margin-top: 2px;">NIP/NRK : ${lepasNip}</div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        `;
+      }
+    }
+
+    function updateOutputs() {
+      document.getElementById('waPreviewBox').textContent = generateWhatsAppText();
+      renderOfficialPrintLayout();
+    }
+
+    // =========================================================================
+    // 8. PURE JAVASCRIPT VECTOR QR CODE GENERATOR (100% OFFLINE & SCANNABLE)
+    // =========================================================================
+    const MiniQR = (function() {
+      const EXP = new Array(256);
+      const LOG = new Array(256);
+      let x = 1;
+      for (let i = 0; i < 255; i++) {
+        EXP[i] = x;
+        LOG[x] = i;
+        x <<= 1;
+        if (x & 0x100) x ^= 0x11d;
+      }
+      for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+
+      function gfMul(a, b) {
+        if (a === 0 || b === 0) return 0;
+        return EXP[LOG[a] + LOG[b]];
+      }
+
+      function rsGeneratorPoly(degree) {
+        let poly = [1];
+        for (let i = 0; i < degree; i++) {
+          const next = new Array(poly.length + 1).fill(0);
+          for (let j = 0; j < poly.length; j++) {
+            next[j] ^= poly[j];
+            next[j + 1] ^= gfMul(poly[j], EXP[i]);
+          }
+          poly = next;
+        }
+        return poly;
+      }
+
+      function rsEncode(data, ecLen) {
+        const gen = rsGeneratorPoly(ecLen);
+        const res = new Array(ecLen).fill(0);
+        for (let i = 0; i < data.length; i++) {
+          const factor = data[i] ^ res[0];
+          res.shift();
+          res.push(0);
+          for (let j = 0; j < ecLen; j++) {
+            res[j] ^= gfMul(gen[j + 1], factor);
+          }
+        }
+        return res;
+      }
+
+      const VERSIONS = [
+        null,
+        { ver: 1, size: 21, dataBytes: 19, ecBytes: 7, align: [] },
+        { ver: 2, size: 25, dataBytes: 34, ecBytes: 10, align: [6, 18] },
+        { ver: 3, size: 29, dataBytes: 55, ecBytes: 15, align: [6, 22] },
+        { ver: 4, size: 33, dataBytes: 80, ecBytes: 20, align: [6, 26] },
+        { ver: 5, size: 37, dataBytes: 108, ecBytes: 26, align: [6, 30] },
+        { ver: 6, size: 41, dataBytes: 136, ecBytes: 36, align: [6, 34] }
+      ];
+
+      function buildMatrix(text) {
+        const bytes = Array.from(new TextEncoder().encode(text));
+        let spec = null;
+        for (let v = 1; v < VERSIONS.length; v++) {
+          if (bytes.length + 2 <= VERSIONS[v].dataBytes) {
+            spec = VERSIONS[v];
+            break;
+          }
+        }
+        if (!spec) {
+          spec = VERSIONS[6];
+          bytes.length = spec.dataBytes - 2;
+        }
+
+        const bits = [];
+        const pushBits = (val, len) => {
+          for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1);
+        };
+        pushBits(0b0100, 4);
+        pushBits(bytes.length, 8);
+        bytes.forEach(b => pushBits(b, 8));
+        pushBits(0, Math.min(4, spec.dataBytes * 8 - bits.length));
+        while (bits.length % 8 !== 0) bits.push(0);
+
+        const codewords = [];
+        for (let i = 0; i < bits.length; i += 8) {
+          let b = 0;
+          for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j];
+          codewords.push(b);
+        }
+        const padBytes = [0xec, 0x11];
+        let padIdx = 0;
+        while (codewords.length < spec.dataBytes) {
+          codewords.push(padBytes[padIdx % 2]);
+          padIdx++;
+        }
+
+        const ec = rsEncode(codewords, spec.ecBytes);
+        const allBytes = codewords.concat(ec);
+
+        const N = spec.size;
+        const grid = Array.from({ length: N }, () => new Array(N).fill(null));
+        const isFunc = Array.from({ length: N }, () => new Array(N).fill(false));
+
+        function setFunc(r, c, val) {
+          if (r >= 0 && r < N && c >= 0 && c < N) {
+            grid[r][c] = val ? 1 : 0;
+            isFunc[r][c] = true;
+          }
+        }
+
+        function placeFinder(top, left) {
+          for (let r = -1; r <= 7; r++) {
+            for (let c = -1; c <= 7; c++) {
+              const inOuter = r >= 0 && r <= 6 && c >= 0 && c <= 6;
+              const inBorder = r === 0 || r === 6 || c === 0 || c === 6;
+              const inCenter = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+              setFunc(top + r, left + c, inOuter && (inBorder || inCenter));
+            }
+          }
+        }
+        placeFinder(0, 0);
+        placeFinder(0, N - 7);
+        placeFinder(N - 7, 0);
+
+        if (spec.align.length > 0) {
+          const pos = spec.align[1];
+          for (let r = -2; r <= 2; r++) {
+            for (let c = -2; c <= 2; c++) {
+              const dark = Math.max(Math.abs(r), Math.abs(c)) !== 1;
+              setFunc(pos + r, pos + c, dark);
+            }
+          }
+        }
+
+        for (let i = 8; i < N - 8; i++) {
+          setFunc(6, i, i % 2 === 0);
+          setFunc(i, 6, i % 2 === 0);
+        }
+
+        setFunc(N - 8, 8, 1);
+        for (let i = 0; i < 9; i++) {
+          if (!isFunc[8][i]) setFunc(8, i, 0);
+          if (!isFunc[i][8]) setFunc(i, 8, 0);
+        }
+        for (let i = 0; i < 8; i++) {
+          if (!isFunc[8][N - 1 - i]) setFunc(8, N - 1 - i, 0);
+          if (!isFunc[N - 1 - i][8]) setFunc(N - 1 - i, 8, 0);
+        }
+
+        let bitIdx = 0;
+        const totalBits = allBytes.length * 8;
+        let up = true;
+        for (let right = N - 1; right >= 1; right -= 2) {
+          if (right === 6) right = 5;
+          for (let step = 0; step < N; step++) {
+            const r = up ? N - 1 - step : step;
+            for (let dx = 0; dx < 2; dx++) {
+              const c = right - dx;
+              if (!isFunc[r][c]) {
+                let bit = 0;
+                if (bitIdx < totalBits) {
+                  bit = (allBytes[bitIdx >>> 3] >>> (7 - (bitIdx & 7))) & 1;
+                  bitIdx++;
+                }
+                if ((r + c) % 2 === 0) bit ^= 1;
+                grid[r][c] = bit;
+              }
+            }
+          }
+          up = !up;
+        }
+
+        const formatBits = 0x77c4;
+        for (let i = 0; i < 15; i++) {
+          const bit = (formatBits >>> i) & 1;
+          if (i < 6) grid[i][8] = bit;
+          else if (i < 8) grid[i + 1][8] = bit;
+          else grid[N - 15 + i][8] = bit;
+
+          if (i < 8) grid[8][N - 1 - i] = bit;
+          else if (i < 9) grid[8][15 - i] = bit;
+          else grid[8][14 - i] = bit;
+        }
+
+        return grid;
+      }
+
+      function toSVG(text) {
+        const matrix = buildMatrix(text);
+        const n = matrix.length;
+        const quiet = 2;
+        const dim = n + quiet * 2;
+        let rects = '';
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            if (matrix[r][c] === 1) {
+              rects += `<rect x="${c + quiet}" y="${r + quiet}" width="1" height="1" fill="#0F172A"/>`;
+            }
+          }
+        }
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${dim} ${dim}" shape-rendering="crispEdges" class="w-full h-full"><rect width="${dim}" height="${dim}" fill="#FFFFFF"/>${rects}</svg>`;
+      }
+
+      return { toSVG };
+    })();
+
+    // =========================================================================
+    // 9. KONTROL MODAL QR CODE UNIT
+    // =========================================================================
+    function getDefaultBaseUrl() {
+      try {
+        if (window.location.protocol.startsWith('http') && window.location.origin !== 'null') {
+          return `${window.location.origin}${window.location.pathname}`;
+        }
+      } catch (e) {}
+      return 'https://danangrifky37-cyber.github.io/Lembar-Ceklis-Damkar-Sektor-V-/';
+    }
+
+    function getFullUnitShareUrl(unitId) {
+      const inputEl = document.getElementById('qrBaseUrlInput');
+      let base = (inputEl && inputEl.value.trim()) ? inputEl.value.trim() : getDefaultBaseUrl();
+      base = base.split('?')[0];
+      return `${base}?unit=${unitId}`;
+    }
+
+    function renderQrModalContent() {
+      const cfg = UNITS_CONFIG[qrModalUnitId];
+      document.getElementById('qrStickerTitle').textContent = cfg.jenisKdo.toUpperCase();
+      document.getElementById('qrStickerPlate').textContent = cfg.tnkb;
+
+      document.querySelectorAll('.qr-tab-btn').forEach(btn => {
+        const active = btn.dataset.qrUnit === qrModalUnitId;
+        btn.className = active
+          ? 'qr-tab-btn py-2 px-2.5 rounded-xl text-xs font-bold border bg-red-700 text-white border-red-700 shadow-2xs transition'
+          : 'qr-tab-btn py-2 px-2.5 rounded-xl text-xs font-bold border bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200 transition';
+      });
+
+      const fullUrl = getFullUnitShareUrl(qrModalUnitId);
+      document.getElementById('qrSvgContainer').innerHTML = MiniQR.toSVG(fullUrl);
+    }
+
+    // =========================================================================
+    // 10. CLIPBOARD & SHARE WHATSAPP
+    // =========================================================================
+    function copyTextSafe(text, successMsg) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      try {
+        document.execCommand('copy');
+        showToast(successMsg);
+      } catch (err) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => showToast(successMsg));
+        }
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    }
+
+    // =========================================================================
+    // 11. INISIALISASI EVENT LISTENERS
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      detectUnitFromURL();
+      syncUrlParam(activeUnitId);
+
+      // Mulai sinkronisasi harian real-time Firebase untuk hari ini
+      listenDailyData(activeUnitId, getTodayISO());
+
+      // Pemilih Multi-Unit (Dropdown & Pill)
+      document.getElementById('unitSelector').addEventListener('change', (e) => {
+        switchUnit(e.target.value);
+      });
+
+      document.querySelectorAll('.unit-pill-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          switchUnit(btn.dataset.unitPill);
+        });
+      });
+
+      // Toggle kartu data piket
+      document.getElementById('toggleMetaBtn').addEventListener('click', () => {
+        document.getElementById('metaFormContainer').classList.toggle('hidden');
+        document.getElementById('metaChevron').classList.toggle('rotate-180');
+      });
+
+      // Input Tanggal -> muat/sinkronkan data sesuai tanggal yang dipilih
+      document.getElementById('inputTanggal').addEventListener('change', (e) => {
+        const selectedDate = e.target.value || getTodayISO();
+        listenDailyData(activeUnitId, selectedDate);
+      });
+
+      document.getElementById('inputHari').addEventListener('input', (e) => {
+        const st = getActiveState();
+        st.hari = e.target.value;
+        saveActiveState();
+        renderHeaderAndMeta();
+        updateOutputs();
+      });
+
+      // Pilih Group / Regu
+      document.querySelectorAll('.regu-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const st = getActiveState();
+          st.regu = btn.dataset.regu;
+          saveActiveState();
+          renderHeaderAndMeta();
+          updateOutputs();
+        });
+      });
+
+      // Input Nama & NIP/NRK Kepala Regu
+      const bindMeta = (domId, prop) => {
+        document.getElementById(domId).addEventListener('input', (e) => {
+          getActiveState()[prop] = e.target.value;
+          saveActiveState();
+          updateOutputs();
+        });
+      };
+      bindMeta('karuNaikNama', 'karuNaikNama');
+      bindMeta('karuNaikNip', 'karuNaikNip');
+      bindMeta('karuLepasNama', 'karuLepasNama');
+      bindMeta('karuLepasNip', 'karuLepasNip');
+
+      // Tombol Cepat: Semua Normal (Baik & Ada)
+      document.getElementById('markAllNormalBtn').addEventListener('click', () => {
+        const st = getActiveState();
+        st.items.forEach(item => {
+          item.checked = true;
+          item.status = 'ada';
+          item.condition = 'baik';
+          item.goodQty = item.qty;
+          item.badQty = 0;
+        });
+        saveActiveState();
+        updateStatsAndProgress();
+        renderEquipmentList();
+        updateOutputs();
+        showToast('Semua 35 item ditandai Normal & tersinkron');
+      });
+
+      // Tombol Reset Ceklis (Konfirmasi Modal)
+      const confirmModal = document.getElementById('confirmModal');
+      document.getElementById('resetChecklistBtn').addEventListener('click', () => {
+        document.getElementById('confirmUnitName').textContent = getActiveConfig().shortLabel;
+        confirmModal.classList.remove('hidden');
+      });
+
+      document.getElementById('cancelResetBtn').addEventListener('click', () => {
+        confirmModal.classList.add('hidden');
+      });
+
+      document.getElementById('confirmResetBtn').addEventListener('click', () => {
+        const st = getActiveState();
+        st.items.forEach(item => {
+          item.checked = false;
+          item.status = 'ada';
+          item.condition = 'baik';
+          item.goodQty = item.qty;
+          item.badQty = 0;
+          item.note = '';
+          item.showNote = false;
+        });
+        saveActiveState();
+        updateStatsAndProgress();
+        renderEquipmentList();
+        updateOutputs();
+        confirmModal.classList.add('hidden');
+        showToast('Ceklis unit berhasil direset');
+      });
+
+      // Pencarian & Filter
+      const searchInput = document.getElementById('searchInput');
+      const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        clearSearchBtn.classList.toggle('hidden', !searchQuery);
+        renderEquipmentList();
+      });
+
+      clearSearchBtn.addEventListener('click', () => {
+        searchQuery = '';
+        searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+        renderEquipmentList();
+      });
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentFilter = btn.dataset.filter;
+          updateStatsAndProgress();
+          renderEquipmentList();
+        });
+      });
+
+      document.getElementById('resetFilterBtn').addEventListener('click', () => {
+        currentFilter = 'all';
+        searchQuery = '';
+        searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+        updateStatsAndProgress();
+        renderEquipmentList();
+      });
+
+      // Modal QR Code Unit
+      const qrModal = document.getElementById('qrModal');
+      const qrBaseUrlInput = document.getElementById('qrBaseUrlInput');
+      qrBaseUrlInput.value = getDefaultBaseUrl();
+
+      document.getElementById('openQrModalBtn').addEventListener('click', () => {
+        qrModalUnitId = activeUnitId;
+        renderQrModalContent();
+        qrModal.classList.remove('hidden');
+      });
+
+      document.getElementById('closeQrModalBtn').addEventListener('click', () => {
+        qrModal.classList.add('hidden');
+      });
+
+      document.querySelectorAll('.qr-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          qrModalUnitId = btn.dataset.qrUnit;
+          renderQrModalContent();
+        });
+      });
+
+      qrBaseUrlInput.addEventListener('input', () => {
+        renderQrModalContent();
+      });
+
+      document.getElementById('copyQrLinkBtn').addEventListener('click', () => {
+        copyTextSafe(getFullUnitShareUrl(qrModalUnitId), `Link QR ${qrModalUnitId} disalin!`);
+      });
+
+      document.getElementById('downloadQrSvgBtn').addEventListener('click', () => {
+        const svgContent = document.getElementById('qrSvgContainer').innerHTML;
+        const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `QR_Damkar_Sektor5_${qrModalUnitId}.svg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`QR Code ${qrModalUnitId} diunduh!`);
+      });
+
+      // Aksi Laporan Sticky Footer (Salin WA, Kirim WA, Cetak / PDF)
+      document.getElementById('copyWaBtn').addEventListener('click', () => {
+        copyTextSafe(generateWhatsAppText(), 'Laporan WA berhasil disalin!');
+      });
+
+      document.getElementById('sendWaBtn').addEventListener('click', () => {
+        const encoded = encodeURIComponent(generateWhatsAppText());
+        window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener,noreferrer');
+      });
+
+      document.getElementById('printPdfBtn').addEventListener('click', () => {
+        renderOfficialPrintLayout();
+        window.print();
+      });
+    });
+  </script>
+</body>
+</html>
