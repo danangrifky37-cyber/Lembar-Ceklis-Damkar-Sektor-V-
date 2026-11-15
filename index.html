@@ -9,7 +9,9 @@
   <!-- Firebase SDK (Compat v10) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- html2canvas & jsPDF untuk Ekspor Resmi Ukuran F4 / Folio (215mm x 330mm) -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -28,6 +30,11 @@
     };
   </script>
 
+  <!-- Ukuran Kertas Cetak Browser Fallback: F4 / Folio (215mm x 330mm) -->
+  <style id="dynamicPageStyle">
+    @page { size: 215mm 330mm; margin: 7mm 9mm; }
+  </style>
+
   <style>
     body {
       -webkit-tap-highlight-color: transparent;
@@ -43,38 +50,134 @@
       scrollbar-width: none;
     }
 
-    /* Format ekspor resmi: A4 landscape, rapat, simetris, dan konsisten untuk PDF/JPG */
-    @page { size: A4 landscape; margin: 5mm; }
+    /* ==================== FORMAT EKSPOR RESMI F4 / FOLIO (215mm x 330mm) ==================== */
     @media print {
-      html, body { background:#fff !important; color:#111 !important; margin:0 !important; padding:0 !important; }
-      body { font-family:"Times New Roman",serif !important; font-size:7.2pt !important; }
-      .no-print { display:none !important; }
-      .print-only { display:block !important; }
-      #printContainer { display:block !important; width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; background:#fff !important; }
-      #printContainer table { max-width:100% !important; }
-      #printContainer img { max-height:34px !important; max-width:130px !important; object-fit:contain !important; }
-      #printContainer thead { display:table-header-group; }
-      #printContainer tr { break-inside:avoid; page-break-inside:avoid; }
-      #printContainer .print-page { break-after:page; page-break-after:always; }
-      #printContainer .print-page:last-child { break-after:auto; page-break-after:auto; }
+      html, body {
+        background: #ffffff !important;
+        color: #111111 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      body {
+        font-family: "Times New Roman", Times, serif !important;
+        font-size: 8.2pt !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      #printContainer {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+      }
+      #printContainer table {
+        max-width: 100% !important;
+      }
+      #printContainer tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      #printContainer .print-page {
+        width: 100% !important;
+        min-height: 312mm !important;
+        padding: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        break-after: page;
+        page-break-after: always;
+      }
+      #printContainer .print-page:last-child {
+        break-after: auto;
+        page-break-after: auto;
+      }
     }
-    #printContainer { background:#fff; color:#111; width:100%; font-family:"Times New Roman",serif; font-size:7.4pt; line-height:1.12; }
-    #printContainer, #printContainer * { box-sizing:border-box; }
-    #printContainer table { border-collapse:collapse; max-width:100%; }
-    table.official-table { width:100% !important; border-collapse:collapse !important; table-layout:fixed !important; margin:4px 0 0; }
-    table.official-table th, table.official-table td {
-      border:0.55pt solid #667085 !important; padding:3.2pt 5pt !important; font-size:7.4pt !important;
-      line-height:1.18 !important; vertical-align:middle !important;
-      white-space:normal !important; overflow-wrap:break-word !important; word-break:normal !important;
+
+    #printContainer {
+      background: #ffffff;
+      color: #111111;
+      width: 100%;
+      font-family: "Times New Roman", Times, serif;
+      font-size: 8.2pt;
+      line-height: 1.25;
     }
-    table.official-table th { background:#e9edf2 !important; font-weight:700 !important; text-align:center !important; }
-    table.official-table td.text-col, table.official-table th.text-col { text-align:left !important; }
-    table.official-table td.number-col, table.official-table th.number-col { text-align:right !important; font-variant-numeric:tabular-nums; }
-    table.official-table td.center-col, table.official-table th.center-col { text-align:center !important; }
-    table.official-table tbody tr:nth-child(even) { background:#f7f9fb !important; }
-    #printContainer p, #printContainer div { overflow-wrap:anywhere; }
-    #printContainer .print-page { width:100%; padding:5mm !important; break-after:page; page-break-after:always; }
-    #printContainer .print-page:last-child { break-after:auto; page-break-after:auto; }
+    #printContainer, #printContainer * {
+      box-sizing: border-box;
+    }
+    #printContainer table {
+      border-collapse: collapse;
+      max-width: 100%;
+    }
+
+    /* Tabel tanpa garis untuk Header Identitas Unit dan Blok Tanda Tangan */
+    table.no-border-table,
+    table.no-border-table th,
+    table.no-border-table td {
+      border: none !important;
+      background: transparent !important;
+    }
+
+    /* Tabel resmi daftar peralatan dengan padding simetris di tengah sel */
+    table.official-table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      table-layout: fixed !important;
+      margin: 0 !important;
+    }
+    table.official-table th,
+    table.official-table td {
+      border: 0.65pt solid #334155 !important;
+      padding: 4pt 5pt !important;
+      font-size: 8.2pt !important;
+      line-height: 1.24 !important;
+      vertical-align: middle !important;
+      white-space: normal !important;
+      overflow-wrap: break-word !important;
+      word-break: normal !important;
+    }
+    table.official-table th {
+      background: #e9edf2 !important;
+      font-weight: 700 !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+      padding: 5pt 4pt !important;
+    }
+    table.official-table td.text-col,
+    table.official-table th.text-col {
+      text-align: left !important;
+    }
+    table.official-table td.number-col,
+    table.official-table th.number-col {
+      text-align: right !important;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap !important;
+    }
+    table.official-table td.center-col,
+    table.official-table th.center-col {
+      text-align: center !important;
+      white-space: nowrap !important;
+    }
+    table.official-table tbody tr:nth-child(even) {
+      background: #f8fafc !important;
+    }
+    #printContainer .print-page {
+      width: 100%;
+      padding: 6mm;
+      break-after: page;
+      page-break-after: always;
+    }
+    #printContainer .print-page:last-child {
+      break-after: auto;
+      page-break-after: auto;
+    }
   </style>
 </head>
 <body class="text-slate-800 antialiased">
@@ -86,7 +189,6 @@
 
     <!-- HEADER MERAH DAMKAR PROFESIONAL + PEMILIH MULTI-UNIT -->
     <header class="bg-gradient-to-br from-red-800 via-red-700 to-red-900 text-white px-4 pt-4 pb-5 rounded-b-3xl shadow-lg relative overflow-hidden">
-      <!-- Dekorasi Latar Halus -->
       <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full pointer-events-none"></div>
       <div class="absolute left-1/3 -bottom-12 w-32 h-32 bg-amber-400/10 rounded-full pointer-events-none"></div>
 
@@ -94,7 +196,6 @@
       <div class="flex items-start justify-between gap-3 relative z-10">
         <div class="flex items-center gap-3">
           <div class="w-11 h-11 rounded-2xl bg-amber-400 text-red-950 flex items-center justify-center shadow-md shrink-0">
-            <!-- Ikon Perisai Api SVG -->
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 15c-2.21 0-4-1.79-4-4 0-1.66 1.34-3.66 4-6 2.66 2.34 4 4.34 4 6 0 2.21-1.79 4-4 4z"/>
             </svg>
@@ -132,7 +233,6 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
-
       </div>
 
       <!-- Info Lokasi & Status Auto-Sync Cloud -->
@@ -184,8 +284,8 @@
           <div class="flex items-center gap-2.5">
             <span class="w-7 h-7 rounded-lg bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs shrink-0">1</span>
             <div>
-              <h2 class="font-bold text-slate-800 text-sm sm:text-base">Data Piket & Petugas Pemeriksa</h2>
-              <p id="metaSummaryPreview" class="text-xs text-slate-500">Tanggal, Hari, Group & Kepala Regu</p>
+              <h2 class="font-bold text-slate-800 text-sm sm:text-base">Data Piket &amp; Petugas Pemeriksa</h2>
+              <p id="metaSummaryPreview" class="text-xs text-slate-500">Tanggal, Hari, Group &amp; Kepala Regu</p>
             </div>
           </div>
           <svg id="metaChevron" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-400 transition-transform duration-200 rotate-180 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -221,14 +321,14 @@
             <label for="karuNaikNama" class="block text-[11px] font-medium text-slate-600">Nama Lengkap</label>
             <input type="text" id="karuNaikNama" placeholder="Nama kepala regu naik piket" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" />
             <div class="flex justify-between items-center"><label class="text-[11px] font-semibold text-slate-600">Tanda tangan</label><button type="button" id="clearKaruNaikSignature" class="text-[11px] font-bold text-red-700">Hapus</button></div>
-            <canvas id="karuNaikSignature" width="720" height="180" class="w-full h-28 bg-white border border-dashed border-slate-300 rounded-xl touch-none"></canvas>
+            <canvas id="karuNaikSignature" width="600" height="240" class="w-full aspect-[5/2] bg-white border border-dashed border-slate-300 rounded-xl touch-none"></canvas>
           </div>
           <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-2.5">
             <div class="text-xs font-bold text-slate-700 uppercase tracking-wide">Kepala Regu Lepas Piket (Menyerahkan)</div>
             <label for="karuLepasNama" class="block text-[11px] font-medium text-slate-600">Nama Lengkap</label>
             <input type="text" id="karuLepasNama" placeholder="Nama kepala regu lepas piket" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" />
             <div class="flex justify-between items-center"><label class="text-[11px] font-semibold text-slate-600">Tanda tangan</label><button type="button" id="clearKaruLepasSignature" class="text-[11px] font-bold text-red-700">Hapus</button></div>
-            <canvas id="karuLepasSignature" width="720" height="180" class="w-full h-28 bg-white border border-dashed border-slate-300 rounded-xl touch-none"></canvas>
+            <canvas id="karuLepasSignature" width="600" height="240" class="w-full aspect-[5/2] bg-white border border-dashed border-slate-300 rounded-xl touch-none"></canvas>
           </div>
         </div>
       </section>
@@ -328,15 +428,15 @@
       </section>
 
       <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-3 mt-4 mb-4">
-        <div class="flex items-center gap-2"><span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">↓</span><div><h2 class="font-bold text-slate-800 text-sm">Unduh / Cetak Laporan</h2><p class="text-[11px] text-slate-500">Pilih jenis laporan dan format dalam satu tempat.</p></div></div>
+        <div class="flex items-center gap-2"><span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">↓</span><div><h2 class="font-bold text-slate-800 text-sm">Unduh / Cetak Laporan</h2><p class="text-[11px] text-slate-500">Ukuran resmi F4 / Folio (215 &times; 330 mm) &bull; 1 lembar per hari</p></div></div>
         <div class="grid grid-cols-2 gap-2">
           <label class="text-xs font-semibold text-slate-600">Jenis laporan<select id="downloadScope" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"><option value="daily">Harian</option><option value="monthly">Bulanan</option></select></label>
-          <label class="text-xs font-semibold text-slate-600">Format<select id="downloadFormat" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"><option value="jpg">JPG</option><option value="pdf">PDF / Cetak</option></select></label>
+          <label class="text-xs font-semibold text-slate-600">Format<select id="downloadFormat" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"><option value="pdf">PDF (F4)</option><option value="jpg">JPG (F4)</option></select></label>
         </div>
-        <div id="downloadDailyOptions" class="text-xs text-slate-600">Tanggal mengikuti tanggal laporan yang sedang dipilih.</div>
+        <div id="downloadDailyOptions" class="text-xs text-slate-600">Tanggal mengikuti tanggal laporan yang sedang dipilih (1 lembar F4 penuh).</div>
         <div id="downloadMonthlyOptions" class="hidden space-y-2">
           <label class="block text-xs font-semibold text-slate-600">Bulan<input type="month" id="printMonth" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"/></label>
-          <label class="block text-xs font-semibold text-slate-600">Isi laporan<select id="monthlyMode" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"><option value="summary">Rekap bulanan (1 lembar)</option><option value="detail">Rincian ceklis harian sebulan penuh</option></select></label>
+          <label class="block text-xs font-semibold text-slate-600">Isi laporan<select id="monthlyMode" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm"><option value="summary">Rekap bulanan (1 lembar F4)</option><option value="detail">Rincian ceklis harian sebulan penuh (1 lembar F4/hari)</option></select></label>
         </div>
         <button type="button" id="downloadReportBtn" class="w-full rounded-xl bg-amber-600 hover:bg-amber-700 text-white py-3 text-sm font-bold">Unduh Laporan</button>
       </section>
@@ -455,9 +555,7 @@
   <!-- ===================================================================== -->
   <!-- TAMPILAN CETAK RESMI / PDF (PRINT-ONLY - DINAMIS SESUAI UNIT AKTIF)   -->
   <!-- ===================================================================== -->
-  <div id="printContainer" class="print-only hidden">
-    <!-- Konten cetak resmi dirender dinamis oleh JavaScript sesuai Unit 1 atau Unit 2 -->
-  </div>
+  <div id="printContainer" class="print-only hidden"></div>
 
   <!-- ===================================================================== -->
   <!-- LOGIKA JAVASCRIPT MULTI-UNIT, FIREBASE REALTIME SYNC & PRINT ENGINE   -->
@@ -481,6 +579,8 @@
     let syncTimer = null;
     let unsubscribeLive = null;
     let isRemoteUpdate = false;
+    let editingNoteItemId = null;
+    let pendingEquipmentRender = false;
 
     // =========================================================================
     // 1. MASTER DATA KONFIGURASI MULTI-UNIT
@@ -588,7 +688,9 @@
     const STORAGE_PREFIX = 'gulkarmat_sektor5_cloud_v2_';
     const STANDARD_PREFIX = 'gulkarmat_sektor5_standard_v2_';
     const masterUnsubscribers = {};
+
     function masterDocId(unitId) { return `master_${unitId}`; }
+
     function applyMasterData(unitId, master) {
       if (!master) return;
       const cfg = UNITS_CONFIG[unitId];
@@ -608,30 +710,46 @@
       if (active && Array.isArray(active.items)) {
         active.items = active.items.filter(x => !x.custom || (master.customItems || []).some(y => String(y.id) === String(x.id)));
         (master.customItems || []).forEach(x => {
-          if (!active.items.some(y => String(y.id) === String(x.id))) active.items.push({...x, checked:false, status:'ada', condition:'baik', goodQty:x.qty, badQty:0, note:'', showNote:false, custom:true});
+          if (!active.items.some(y => String(y.id) === String(x.id))) {
+            active.items.push({...x, checked:false, status:'ada', condition:'baik', goodQty:x.qty, badQty:0, note:'', showNote:false, custom:true});
+          }
         });
-        active.items.forEach(x => { if (quantities[x.id] && !x.checked) { x.qty=Number(quantities[x.id]); x.goodQty=x.qty; x.badQty=0; } });
+        active.items.forEach(x => {
+          if (quantities[x.id] && !x.checked) {
+            x.qty = Number(quantities[x.id]);
+            x.goodQty = x.qty;
+            x.badQty = 0;
+          }
+        });
       }
     }
+
     function getActiveConfigForUnit(unitId) { return UNITS_CONFIG[unitId]; }
+
     function getMasterData(unitId) {
       const cfg = UNITS_CONFIG[unitId];
       const quantities = Object.fromEntries(cfg.items.filter(x => !x.custom).map(x => [x.id, Number(x.qty)]));
-      const customItems = cfg.items.filter(x => x.custom).map(x => ({id:x.id,name:x.name,qty:Number(x.qty)||1,unit:x.unit||'Buah',custom:true}));
+      const customItems = cfg.items.filter(x => x.custom).map(x => ({id:x.id, name:x.name, qty:Number(x.qty)||1, unit:x.unit||'Buah', custom:true}));
       return { quantities, customItems };
     }
+
     async function saveMasterData(unitId = activeUnitId) {
       const master = getMasterData(unitId);
       localStorage.setItem(STANDARD_PREFIX + unitId, JSON.stringify(master));
       const today = getCurrentDutyDateISO();
-      // Simpan sebagai dokumen master dalam koleksi yang sama dengan laporan harian,
-      // agar tidak membutuhkan koleksi/aturan Firestore baru.
       await db.collection('ceklis_harian').doc(masterDocId(unitId)).set({
-        unit_id: unitId, tanggal: today, record_type: 'master', payload: {...master, items: getActiveConfigForUnit(unitId).items.map(x => ({id:x.id,name:x.name,qty:x.qty,unit:x.unit,custom:!!x.custom}))},
+        unit_id: unitId,
+        tanggal: today,
+        record_type: 'master',
+        payload: {
+          ...master,
+          items: getActiveConfigForUnit(unitId).items.map(x => ({id:x.id, name:x.name, qty:x.qty, unit:x.unit, custom:!!x.custom}))
+        },
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, {merge:true});
       return master;
     }
+
     async function loadStandardOverrides(unitId) {
       try {
         const cached = JSON.parse(localStorage.getItem(STANDARD_PREFIX + unitId) || 'null');
@@ -645,21 +763,28 @@
       masterUnsubscribers[unitId] = db.collection('ceklis_harian').doc(masterDocId(unitId)).onSnapshot(doc => {
         if (doc.exists && doc.data().payload) {
           applyMasterData(unitId, doc.data().payload);
-          if (activeUnitId === unitId) { renderEquipmentList(); updateStatsAndProgress(); updateOutputs(); }
+          if (activeUnitId === unitId) {
+            if (editingNoteItemId !== null) {
+              pendingEquipmentRender = true;
+            } else {
+              renderEquipmentList();
+            }
+            updateStatsAndProgress();
+            updateOutputs();
+          }
         }
       }, err => { console.error('Master equipment listener:', err); setSyncBadge('offline', `Master cloud gagal: ${err.code || 'error'}`); });
     }
+
     async function saveStandardQty(itemId, qty) {
       const item = getActiveConfig().items.find(x => String(x.id) === String(itemId));
       if (item) item.qty = Number(qty);
       return saveMasterData(activeUnitId);
     }
 
-
     // =========================================================================
     // 2. UTILITAS TANGGAL, HARI & FORMAT TEKS
     // =========================================================================
-    // Jadwal piket memakai zona waktu Jakarta dan pergantian shift pukul 07.30.
     const SHIFT_ANCHOR_DATE = '2026-11-15';
     const SHIFT_ANCHOR_GROUP_INDEX = 0; // Group A bertugas mulai 15 Nov 2026 pukul 07.30 WIB
     const GROUPS = ['Group A', 'Group B', 'Group C'];
@@ -692,13 +817,16 @@
       const editable = isCurrentShiftEditable();
       let banner = document.getElementById('shiftLockBanner');
       if (!banner) {
-        banner = document.createElement('div'); banner.id = 'shiftLockBanner';
+        banner = document.createElement('div');
+        banner.id = 'shiftLockBanner';
         banner.className = 'mx-4 mt-3 rounded-xl border px-3 py-2 text-xs font-semibold';
         const main = document.querySelector('main');
         main?.prepend(banner);
       }
       banner.className = `mx-4 mt-3 rounded-xl border px-3 py-2 text-xs font-semibold ${editable ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-amber-300 bg-amber-50 text-amber-900'}`;
-      banner.textContent = editable ? '🟢 Periode piket aktif — pengisian dapat dilakukan sampai pukul 07.30 WIB berikutnya.' : `🔒 Laporan ${formatIndonesianDate(getActiveState().tanggal)} terkunci (hanya baca). Pengisian hanya tersedia pada periode piket yang sedang berjalan.`;
+      banner.textContent = editable
+        ? '🟢 Periode piket aktif — pengisian dapat dilakukan sampai pukul 07.30 WIB berikutnya.'
+        : `🔒 Laporan ${formatIndonesianDate(getActiveState().tanggal)} terkunci (hanya baca). Pengisian hanya tersedia pada periode piket yang sedang berjalan.`;
     }
 
     function getIndonesianDayName(isoString) {
@@ -804,7 +932,7 @@
     }
 
     // Simpan otomatis ke Cloud Firestore & cadangan localStorage
-    function saveActiveState() {
+    function saveActiveState(immediate = false) {
       if (isRemoteUpdate) return;
       if (!isCurrentShiftEditable()) { showToast('Periode laporan sudah terkunci / belum dimulai.'); return; }
       const st = getActiveState();
@@ -817,7 +945,7 @@
       setSyncBadge('syncing', 'Menyinkronkan...');
 
       clearTimeout(syncTimer);
-      syncTimer = setTimeout(async () => {
+      const runSync = async () => {
         try {
           await db.collection('ceklis_harian').doc(docId).set({
             unit_id: activeUnitId,
@@ -830,7 +958,13 @@
           console.error('Gagal sinkron ke Firebase:', err);
           setSyncBadge('offline', `Cloud gagal: ${err.code || err.message || 'periksa Rules/koneksi'}`);
         }
-      }, 500);
+      };
+
+      if (immediate) {
+        runSync();
+      } else {
+        syncTimer = setTimeout(runSync, 750);
+      }
     }
 
     // Dengarkan perubahan data secara real-time berdasarkan Unit & Tanggal aktif
@@ -839,6 +973,9 @@
         unsubscribeLive();
         unsubscribeLive = null;
       }
+
+      editingNoteItemId = null;
+      pendingEquipmentRender = false;
 
       const docId = getDailyDocId(unitId, tanggal);
       setSyncBadge('syncing', 'Memuat data...');
@@ -849,7 +986,9 @@
           const parsed = JSON.parse(cached);
           if (parsed && Array.isArray(parsed.items)) {
             unitStates[unitId] = parsed;
-            if (!unitStates[unitId].keteranganUmum) unitStates[unitId].keteranganUmum = [parsed.catatanKondisiUnit, parsed.jurnalKegiatan].filter(Boolean).join('\n\n');
+            if (!unitStates[unitId].keteranganUmum) {
+              unitStates[unitId].keteranganUmum = [parsed.catatanKondisiUnit, parsed.jurnalKegiatan].filter(Boolean).join('\n\n');
+            }
           }
         } else {
           unitStates[unitId] = createInitialUnitState(unitId, tanggal);
@@ -875,11 +1014,19 @@
             const remoteData = doc.data().payload;
             const currentItems = unitStates[unitId].items;
             if (Array.isArray(remoteData.items)) {
-              remoteData.items.forEach((rItem, idx) => {
-                rItem.showNote = currentItems.find(x => x.id === rItem.id)?.showNote || false;
+              remoteData.items.forEach((rItem) => {
+                const localItem = currentItems.find(x => x.id === rItem.id);
+                if (editingNoteItemId !== null && rItem.id === editingNoteItemId && localItem) {
+                  rItem.note = localItem.note;
+                  rItem.showNote = true;
+                } else {
+                  rItem.showNote = Boolean(rItem.showNote || (localItem && localItem.showNote));
+                }
               });
               unitStates[unitId] = remoteData;
-              if (!unitStates[unitId].keteranganUmum) unitStates[unitId].keteranganUmum = [remoteData.catatanKondisiUnit, remoteData.jurnalKegiatan].filter(Boolean).join('\n\n');
+              if (!unitStates[unitId].keteranganUmum) {
+                unitStates[unitId].keteranganUmum = [remoteData.catatanKondisiUnit, remoteData.jurnalKegiatan].filter(Boolean).join('\n\n');
+              }
               unitStates[unitId].regu = getGroupForDutyDate(tanggal);
               try {
                 localStorage.setItem(STORAGE_PREFIX + docId, JSON.stringify(remoteData));
@@ -891,7 +1038,14 @@
 
           renderHeaderAndMeta();
           updateStatsAndProgress();
-          renderEquipmentList();
+
+          const activeInsideList = document.activeElement && document.activeElement.closest('#equipmentList');
+          if (editingNoteItemId !== null || activeInsideList) {
+            pendingEquipmentRender = true;
+          } else {
+            renderEquipmentList();
+          }
+
           renderExtraNotes();
           document.getElementById('karuNaikSignature')?._restore?.();
           document.getElementById('karuLepasSignature')?._restore?.();
@@ -953,7 +1107,7 @@
       toastTimer = setTimeout(() => {
         toast.classList.remove('opacity-100', 'translate-y-0');
         toast.classList.add('opacity-0', '-translate-y-2');
-      }, 2500);
+      }, 2800);
     }
 
     // =========================================================================
@@ -975,7 +1129,6 @@
 
       document.getElementById('unitSelector').value = activeUnitId;
       document.getElementById('headerUnitSubtitle').textContent = `${cfg.pos} • ${cfg.jenisKdo}`;
-
 
       document.getElementById('inputTanggal').value = st.tanggal;
       document.getElementById('inputHari').value = st.hari;
@@ -1168,7 +1321,17 @@
           `;
         }
 
-        const showDetailPanel = prob || item.showNote || (item.note && item.note.trim().length > 0);
+        const showDetailPanel = Boolean(
+          prob ||
+          item.showNote ||
+          editingNoteItemId === item.id ||
+          (item.note && item.note.trim().length > 0)
+        );
+
+        const showDamagedStepper = Boolean(
+          (activeUnitId === 'B9006PHA' && prob) ||
+          (activeUnitId === 'B9636PHA' && item.checked && item.status === 'ada' && item.condition === 'rusak' && Number(item.qty) > 1)
+        );
 
         return `
           <article class="rounded-2xl border p-3.5 shadow-2xs transition-all ${cardClass}">
@@ -1201,18 +1364,18 @@
 
             ${showDetailPanel ? `
               <div class="mt-3 pt-3 border-t ${prob ? 'border-red-200' : 'border-slate-200'} space-y-2.5">
-                ${(activeUnitId === 'B9006PHA' && prob) ? `
+                ${showDamagedStepper ? `
                   <div class="flex items-center justify-between gap-2 bg-white p-2.5 rounded-xl border border-red-200">
                     <div>
-                      <div class="text-[11px] font-bold text-slate-700">Rincian Jumlah Baik vs Rusak</div>
-                      <div class="text-[11px] text-red-600 font-semibold">
-                        Rusak: <span class="font-mono font-bold">${item.badQty} ${escapeHtml(item.unit)}</span>
+                      <div class="text-[11px] font-bold text-red-700">Jumlah Peralatan Rusak</div>
+                      <div class="text-[11px] text-slate-600 font-semibold">
+                        Kondisi Baik: <span class="font-mono font-bold text-emerald-700">${item.goodQty} ${escapeHtml(item.unit)}</span> <span class="text-slate-400">(dari ${item.qty})</span>
                       </div>
                     </div>
                     <div class="flex items-center gap-2">
-                      <button type="button" onclick="adjustUnit1GoodQty(${item.id}, -1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 font-extrabold text-sm border border-slate-300">-</button>
-                      <span class="font-mono font-extrabold text-sm w-7 text-center">${item.goodQty}</span>
-                      <button type="button" onclick="adjustUnit1GoodQty(${item.id}, 1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 font-extrabold text-sm border border-slate-300">+</button>
+                      <button type="button" onclick="adjustDamagedQty(${item.id}, -1)" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 font-extrabold text-sm border border-red-200">-</button>
+                      <span class="font-mono font-extrabold text-sm w-7 text-center text-red-700">${item.badQty}</span>
+                      <button type="button" onclick="adjustDamagedQty(${item.id}, 1)" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 font-extrabold text-sm border border-red-200">+</button>
                     </div>
                   </div>
                 ` : ''}
@@ -1228,7 +1391,7 @@
                       `).join('')}
                     </div>
                   ` : ''}
-                  <input type="text" value="${escapeHtml(item.note)}" oninput="updateItemNote(${item.id}, this.value)" placeholder="Tulis keterangan kondisi alat..." class="w-full rounded-xl border ${prob ? 'border-red-300' : 'border-slate-300'} bg-white px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-600" />
+                  <input type="text" data-note-item="${item.id}" value="${escapeHtml(item.note)}" onfocus="handleNoteFocus(${item.id})" onblur="handleNoteBlur(${item.id})" oninput="updateItemNote(${item.id}, this.value)" placeholder="Tulis keterangan kondisi alat..." class="w-full rounded-xl border ${prob ? 'border-red-300' : 'border-slate-300'} bg-white px-3 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-600" />
                 </div>
               </div>
             ` : ''}
@@ -1250,10 +1413,11 @@
         item.goodQty = item.qty;
         item.badQty = 0;
       } else {
-        if (item.badQty === 0) {
+        if (!item.badQty || item.badQty < 1) {
           item.badQty = 1;
-          item.goodQty = Math.max(0, item.qty - 1);
         }
+        item.badQty = Math.min(item.qty, item.badQty);
+        item.goodQty = Math.max(0, item.qty - item.badQty);
       }
       saveActiveState();
       updateStatsAndProgress();
@@ -1261,12 +1425,12 @@
       updateOutputs();
     };
 
-    window.adjustUnit1GoodQty = function(id, delta) {
+    window.adjustDamagedQty = function(id, delta) {
       const item = getActiveState().items.find(i => i.id === id);
       if (!item) return;
-      const maxGood = Math.max(0, item.qty - 1);
-      item.goodQty = Math.min(maxGood, Math.max(0, item.goodQty + delta));
-      item.badQty = item.qty - item.goodQty;
+      const maxBad = Math.max(1, Number(item.qty) || 1);
+      item.badQty = Math.min(maxBad, Math.max(1, (Number(item.badQty) || 1) + delta));
+      item.goodQty = Math.max(0, (Number(item.qty) || 1) - item.badQty);
       saveActiveState();
       renderEquipmentList();
       updateOutputs();
@@ -1279,8 +1443,12 @@
       item.status = status;
       if (status === 'tdk_ada') {
         item.condition = 'none';
+        item.badQty = item.qty;
+        item.goodQty = 0;
       } else if (item.condition === 'none') {
         item.condition = 'baik';
+        item.goodQty = item.qty;
+        item.badQty = 0;
       }
       saveActiveState();
       updateStatsAndProgress();
@@ -1294,6 +1462,14 @@
       item.checked = true;
       item.status = 'ada';
       item.condition = cond;
+      if (cond === 'baik') {
+        item.goodQty = item.qty;
+        item.badQty = 0;
+      } else {
+        if (!item.badQty || item.badQty < 1) item.badQty = 1;
+        item.badQty = Math.min(item.qty, item.badQty);
+        item.goodQty = Math.max(0, item.qty - item.badQty);
+      }
       saveActiveState();
       updateStatsAndProgress();
       renderEquipmentList();
@@ -1304,12 +1480,37 @@
       const item = getActiveState().items.find(i => i.id === id);
       if (!item) return;
       item.showNote = !item.showNote;
+      if (!item.showNote && editingNoteItemId === id) {
+        editingNoteItemId = null;
+      }
       renderEquipmentList();
+      if (item.showNote) {
+        const inp = document.querySelector(`input[data-note-item="${id}"]`);
+        if (inp) inp.focus();
+      }
+    };
+
+    window.handleNoteFocus = function(id) {
+      editingNoteItemId = id;
+      const item = getActiveState().items.find(i => i.id === id);
+      if (item) item.showNote = true;
+    };
+
+    window.handleNoteBlur = function(id) {
+      if (editingNoteItemId === id) {
+        editingNoteItemId = null;
+      }
+      saveActiveState(true);
+      if (pendingEquipmentRender) {
+        pendingEquipmentRender = false;
+        renderEquipmentList();
+      }
     };
 
     window.appendQuickNote = function(id, tag) {
       const item = getActiveState().items.find(i => i.id === id);
       if (!item) return;
+      item.showNote = true;
       if (!item.note.trim()) {
         item.note = tag;
       } else if (!item.note.toLowerCase().includes(tag.toLowerCase())) {
@@ -1323,6 +1524,8 @@
     window.updateItemNote = function(id, val) {
       const item = getActiveState().items.find(i => i.id === id);
       if (!item) return;
+      editingNoteItemId = id;
+      item.showNote = true;
       item.note = val;
       saveActiveState();
       updateOutputs();
@@ -1333,8 +1536,13 @@
       const item = getActiveState().items.find(x => x.id === id);
       if (!item) return;
       item.qty = Math.max(1, Number(item.qty || 1) + delta);
-      if (item.checked && item.condition === 'baik') { item.goodQty = item.qty; item.badQty = 0; }
-      else { item.goodQty = Math.min(item.qty, Number(item.goodQty ?? item.qty)); item.badQty = Math.max(0, item.qty - item.goodQty); }
+      if (item.checked && item.condition === 'baik') {
+        item.goodQty = item.qty;
+        item.badQty = 0;
+      } else {
+        item.badQty = Math.min(item.qty, Math.max(1, Number(item.badQty) || 1));
+        item.goodQty = Math.max(0, item.qty - item.badQty);
+      }
       try { await saveStandardQty(id, item.qty); showToast('Standar jumlah tersimpan untuk hari berikutnya.'); }
       catch(e) { showToast(`Tersimpan di HP, cloud gagal: ${e.code || e.message || 'periksa Rules Firebase'}`); }
       saveActiveState(); updateStatsAndProgress(); renderEquipmentList(); updateOutputs();
@@ -1352,7 +1560,6 @@
       updateStatsAndProgress(); renderEquipmentList(); updateOutputs();
     };
 
-
     function renderExtraNotes() {
       const st = getActiveState();
       const el = document.getElementById('generalRemarks');
@@ -1360,7 +1567,7 @@
     }
 
     // =========================================================================
-    // 7. GENERATOR LAPORAN WHATSAPP & CETAK FORMULIR RESMI (PDF / PRINT)
+    // 7. GENERATOR LAPORAN WHATSAPP & CETAK FORMULIR RESMI F4 (215mm x 330mm)
     // =========================================================================
     function generateWhatsAppText() {
       const cfg = getActiveConfig();
@@ -1399,7 +1606,7 @@
               `${idx + 1}. *${item.name}* (Standar: ${item.qty} ${item.unit}) -> Baik: ${item.goodQty}, Rusak: *${item.badQty} ${item.unit}*${ket}`
             );
           } else {
-            const labelMasalah = item.status === 'tdk_ada' ? 'TIDAK ADA' : 'ADA - KONDISI RUSAK';
+            const labelMasalah = item.status === 'tdk_ada' ? 'TIDAK ADA' : `ADA - KONDISI RUSAK${Number(item.qty) > 1 ? ` (${item.badQty} ${item.unit})` : ''}`;
             lines.push(
               `${idx + 1}. *${item.name}* (${item.qty} ${item.unit}) -> *${labelMasalah}*${ket}`
             );
@@ -1427,19 +1634,25 @@
       return lines.join('\n');
     }
 
-    function renderOfficialPrintLayout() {
+    function buildOfficialDailySheetHtml(st) {
       const cfg = getActiveConfig();
-      const st = getActiveState();
-      const container = document.getElementById('printContainer');
-
       const tglStr = formatIndonesianDate(st.tanggal);
-      const naikNama = st.karuNaikNama.trim() ? `( ${escapeHtml(st.karuNaikNama.trim())} )` : '( ........................................ )';
-      const lepasNama = st.karuLepasNama.trim() ? `( ${escapeHtml(st.karuLepasNama.trim())} )` : '( ........................................ )';
-      const sigNaik = st.tandaTanganNaik ? `<img src="${st.tandaTanganNaik}" style="height:34px;max-width:130px;object-fit:contain;"/>` : '<div style="height:48px;"></div>';
-      const sigLepas = st.tandaTanganLepas ? `<img src="${st.tandaTanganLepas}" style="height:34px;max-width:130px;object-fit:contain;"/>` : '<div style="height:48px;"></div>';
+      const naikNama = st.karuNaikNama && st.karuNaikNama.trim() ? `( ${escapeHtml(st.karuNaikNama.trim())} )` : '( ........................................ )';
+      const lepasNama = st.karuLepasNama && st.karuLepasNama.trim() ? `( ${escapeHtml(st.karuLepasNama.trim())} )` : '( ........................................ )';
+
+      // Gambar tanda tangan tegak proporsional tanpa distorsi miring
+      const sigNaik = st.tandaTanganNaik
+        ? `<div style="height:56px;display:flex;align-items:center;justify-content:center;margin:4px 0;"><img src="${st.tandaTanganNaik}" style="height:52px;width:auto;max-width:180px;display:block;transform:none;"/></div>`
+        : '<div style="height:56px;"></div>';
+      const sigLepas = st.tandaTanganLepas
+        ? `<div style="height:56px;display:flex;align-items:center;justify-content:center;margin:4px 0;"><img src="${st.tandaTanganLepas}" style="height:52px;width:auto;max-width:180px;display:block;transform:none;"/></div>`
+        : '<div style="height:56px;"></div>';
+
+      const ketText = escapeHtml(st.keteranganUmum || [st.catatanKondisiUnit, st.jurnalKegiatan].filter(Boolean).join('\n\n') || '-');
+      const reguDisplay = escapeHtml((st.regu || getGroupForDutyDate(st.tanggal)).toUpperCase());
 
       if (activeUnitId === 'B9006PHA') {
-        const rowsHtml = st.items.map(item => {
+        const rowsHtml = st.items.map((item, idx) => {
           let baikVal = '';
           let rusakVal = '';
           if (item.checked) {
@@ -1451,95 +1664,116 @@
               rusakVal = item.badQty;
             }
           }
-          const ketVal = item.note.trim() ? escapeHtml(item.note.trim()) : (item.checked && item.condition === 'baik' ? 'Baik' : '');
+          const ketVal = (item.note || '').trim() ? escapeHtml(item.note.trim()) : (item.checked && item.condition === 'baik' ? 'Baik' : '');
           return `
             <tr>
-              <td class="center-col">${item.id}.</td>
+              <td class="center-col">${idx + 1}.</td>
               <td class="text-col">${escapeHtml(item.name)}</td>
-              <td class="number-col">${item.qty}</td>
+              <td class="center-col">${item.qty}</td>
               <td class="center-col">${escapeHtml(item.unit)}</td>
-              <td class="number-col">${baikVal}</td>
-              <td class="number-col">${rusakVal}</td>
+              <td class="center-col">${baikVal}</td>
+              <td class="center-col">${rusakVal}</td>
               <td class="text-col">${ketVal}</td>
             </tr>
           `;
         }).join('');
 
-        container.innerHTML = `
-          <div style="text-align: center; font-weight: bold; font-size: 9pt; margin-bottom: 4px; letter-spacing: 0.25px;">
-            ${cfg.printTitle}
-          </div>
+        return `
+          <section class="print-page f4-portrait-sheet" style="display:flex;flex-direction:column;justify-content:space-between;min-height:1185px;padding-bottom:14px;">
+            <div>
+              <div style="text-align: center; font-weight: bold; font-size: 11.5pt; margin-bottom: 14px; letter-spacing: 0.4px;">
+                ${cfg.printTitle}
+              </div>
 
-          <table style="width: 100%; margin-bottom: 6px; font-size: 9.5pt; font-weight: bold;">
-            <tr>
-              <td style="width: 115px;">NOPOL</td>
-              <td style="width: 10px;">:</td>
-              <td>${cfg.tnkb}</td>
-              <td style="text-align: right;">GROUP / REGU : ${escapeHtml(st.regu.toUpperCase())}</td>
-            </tr>
-            <tr>
-              <td>SEKTOR</td>
-              <td>:</td>
-              <td colspan="2">${cfg.kantorUpt}</td>
-            </tr>
-            <tr>
-              <td>POS</td>
-              <td>:</td>
-              <td colspan="2">${cfg.pos}</td>
-            </tr>
-          </table>
+              <table class="no-border-table" style="width: 100%; margin-bottom: 14px; font-size: 9.5pt; font-weight: bold;">
+                <tr>
+                  <td style="width: 72px; padding: 2.5px 0;">NOPOL</td>
+                  <td style="width: 12px; padding: 2.5px 0;">:</td>
+                  <td style="padding: 2.5px 0;">${cfg.tnkb}</td>
+                  <td style="text-align: right; padding: 2.5px 0;">GROUP / REGU : ${reguDisplay}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 2.5px 0;">SEKTOR</td>
+                  <td style="padding: 2.5px 0;">:</td>
+                  <td colspan="2" style="padding: 2.5px 0;">${cfg.kantorUpt}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 2.5px 0;">POS</td>
+                  <td style="padding: 2.5px 0;">:</td>
+                  <td colspan="2" style="padding: 2.5px 0;">${cfg.pos}</td>
+                </tr>
+              </table>
 
-          <table class="official-table table-seven"><colgroup><col style="width:4%"><col style="width:33%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:29%"></colgroup>
-            <thead>
-              <tr>
-                <th>NO.</th>
-                <th class="text-col">NAMA PERALATAN</th>
-                <th style="width: 54px;">JUMLAH</th>
-                <th style="width: 60px;">SATUAN</th>
-                <th style="width: 48px;">BAIK</th>
-                <th style="width: 50px;">RUSAK</th>
-                <th class="text-col" style="width: 140px;">KETERANGAN</th>
-              </tr>
-            </thead>
-            <tbody>${rowsHtml}</tbody>
-          </table>
-
-          <div style="margin-top: 5px; font-size: 7.5pt;">
-            <div style="text-align: right; margin-bottom: 4px;">
-              Jakarta, ${tglStr}
+              <table class="official-table table-seven">
+                <colgroup>
+                  <col style="width:4.5%">
+                  <col style="width:43.5%">
+                  <col style="width:8.5%">
+                  <col style="width:9.5%">
+                  <col style="width:6.5%">
+                  <col style="width:7.5%">
+                  <col style="width:20.0%">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>NO.</th>
+                    <th class="text-col">NAMA PERALATAN</th>
+                    <th>JUMLAH</th>
+                    <th>SATUAN</th>
+                    <th>BAIK</th>
+                    <th>RUSAK</th>
+                    <th class="text-col">KETERANGAN</th>
+                  </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+              </table>
             </div>
-            <div style="text-align: center; margin-bottom: 8px;">
-              Yang Memeriksa,
+
+            <div style="margin-top: 12px;">
+              <div style="font-size: 8.5pt; line-height: 1.35; white-space: pre-wrap; margin-bottom: 14px;"><strong>KETERANGAN :</strong><br/>${ketText}</div>
+
+              <div style="font-size: 9pt; padding-bottom: 10px;">
+                <div style="text-align: right; margin-bottom: 6px;">
+                  Jakarta, ${tglStr}
+                </div>
+                <div style="text-align: center; margin-bottom: 8px;">
+                  Yang Memeriksa,
+                </div>
+                <table class="no-border-table" style="width: 100%; text-align: center;">
+                  <tr>
+                    <td style="width: 50%; vertical-align: top;">
+                      <div style="font-weight: bold;">Kepala Regu Piket</div>
+                      ${sigNaik}
+                      <div style="font-weight: bold; text-decoration: underline;">${naikNama}</div>
+                    </td>
+                    <td style="width: 50%; vertical-align: top;">
+                      <div style="font-weight: bold;">Kepala Regu Lepas Piket</div>
+                      ${sigLepas}
+                      <div style="font-weight: bold; text-decoration: underline;">${lepasNama}</div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
             </div>
-            <table style="width: 100%; text-align: center;">
-              <tr>
-                <td style="width: 50%; vertical-align: top;">
-                  <div style="font-weight: bold;">Kepala Regu Piket</div>
-                  ${sigNaik}
-                  <div style="font-weight: bold; text-decoration: underline;">${naikNama}</div>
-                </td>
-                <td style="width: 50%; vertical-align: top;">
-                  <div style="font-weight: bold;">Kepala Regu Lepas Piket</div>
-                  ${sigLepas}
-                  <div style="font-weight: bold; text-decoration: underline;">${lepasNama}</div>
-                </td>
-              </tr>
-            </table>
-          </div>
+          </section>
         `;
       } else {
-        const rowsHtml = st.items.map(item => {
+        const rowsHtml = st.items.map((item, idx) => {
           const checkAda = item.checked && item.status === 'ada' ? '✓' : '';
           const checkTdkAda = item.checked && item.status === 'tdk_ada' ? '✓' : '';
           const checkBaik = item.checked && item.status === 'ada' && item.condition === 'baik' ? '✓' : '';
           const checkRusak = item.checked && item.status === 'ada' && item.condition === 'rusak' ? '✓' : '';
-          const ketVal = escapeHtml(item.note.trim());
+          const rusakInfo = (item.checked && item.status === 'ada' && item.condition === 'rusak' && Number(item.qty) > 1)
+            ? `Rusak: ${item.badQty} ${item.unit}`
+            : '';
+          const rawNote = (item.note || '').trim();
+          const ketVal = escapeHtml([rusakInfo, rawNote].filter(Boolean).join(' - '));
 
           return `
             <tr>
-              <td class="center-col">${item.id}</td>
+              <td class="center-col">${idx + 1}</td>
               <td class="text-col">${escapeHtml(item.name)}</td>
-              <td class="number-col">${item.qty} ${escapeHtml(item.unit)}</td>
+              <td class="center-col">${item.qty} ${escapeHtml(item.unit)}</td>
               <td class="center-col" style="font-weight:bold;">${checkAda}</td>
               <td class="center-col" style="font-weight:bold;">${checkTdkAda}</td>
               <td class="center-col" style="font-weight:bold;">${checkBaik}</td>
@@ -1549,82 +1783,97 @@
           `;
         }).join('');
 
-        const blankRowsHtml = '';
+        return `
+          <section class="print-page f4-portrait-sheet" style="display:flex;flex-direction:column;justify-content:space-between;min-height:1185px;padding-bottom:14px;">
+            <div>
+              <div style="text-align: center; font-weight: bold; font-size: 10.5pt; line-height: 1.3; margin-bottom: 14px;">
+                <div>${cfg.printTitle}</div>
+                <div>${cfg.printSubtitle}</div>
+              </div>
 
+              <table class="no-border-table" style="width: 100%; font-size: 8.8pt; margin-bottom: 14px; vertical-align: top;">
+                <tr>
+                  <td style="width: 66%; vertical-align: top; padding: 0;">
+                    <table class="no-border-table" style="width: 100%; line-height: 1.35;">
+                      <tr><td style="width: 72px; padding: 1.5px 0;">Jenis KDO</td><td style="width: 10px; padding: 1.5px 0;">:</td><td style="padding: 1.5px 0;"><strong>${cfg.jenisKdo}</strong></td></tr>
+                      <tr><td style="padding: 1.5px 0;">No.Unit</td><td style="padding: 1.5px 0;">:</td><td style="padding: 1.5px 0;">-</td></tr>
+                      <tr><td style="padding: 1.5px 0;">TNKB</td><td style="padding: 1.5px 0;">:</td><td style="padding: 1.5px 0;"><strong>${cfg.tnkb}</strong></td></tr>
+                      <tr><td style="padding: 1.5px 0;">Pos</td><td style="padding: 1.5px 0;">:</td><td style="padding: 1.5px 0;">${cfg.pos}</td></tr>
+                      <tr><td style="padding: 1.5px 0;">UPT</td><td style="padding: 1.5px 0;">:</td><td style="padding: 1.5px 0;">${cfg.kantorUpt}</td></tr>
+                      <tr><td style="vertical-align: top; padding: 1.5px 0;">SKPD</td><td style="vertical-align: top; padding: 1.5px 0;">:</td><td style="padding: 1.5px 0;">${cfg.skpd}</td></tr>
+                    </table>
+                  </td>
+                  <td style="width: 34%; vertical-align: top; padding: 0 0 0 14px;">
+                    <table class="no-border-table" style="width: 100%; line-height: 1.4;">
+                      <tr><td style="width: 76px; padding: 1.5px 0;">Hari</td><td style="width: 10px; padding: 1.5px 0;">:</td><td style="padding: 1.5px 0;">${escapeHtml(st.hari || getIndonesianDayName(st.tanggal))}</td></tr>
+                      <tr><td style="padding: 1.5px 0;">Tgl/Bln/Thn</td><td style="padding: 1.5px 0;">:</td><td style="padding: 1.5px 0;">${tglStr}</td></tr>
+                      <tr><td style="padding: 1.5px 0;">Group</td><td style="padding: 1.5px 0;">:</td><td style="padding: 1.5px 0;">${escapeHtml(st.regu || getGroupForDutyDate(st.tanggal))}</td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
 
-        container.innerHTML = `
-          <div style="text-align: center; font-weight: bold; font-size: 10.5pt; line-height: 1.3; margin-bottom: 8px;">
-            <div>${cfg.printTitle}</div>
-            <div>${cfg.printSubtitle}</div>
-          </div>
+              <table class="official-table table-eight">
+                <colgroup>
+                  <col style="width:4.2%">
+                  <col style="width:40.3%">
+                  <col style="width:11.0%">
+                  <col style="width:5.0%">
+                  <col style="width:6.5%">
+                  <col style="width:5.0%">
+                  <col style="width:5.5%">
+                  <col style="width:22.5%">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th rowspan="2">No</th>
+                    <th class="text-col" rowspan="2">Nama Peralatan</th>
+                    <th rowspan="2">Jumlah<br/>Satuan</th>
+                    <th colspan="2">Status</th>
+                    <th colspan="2">Kondisi</th>
+                    <th class="text-col" rowspan="2">Keterangan</th>
+                  </tr>
+                  <tr>
+                    <th>Ada</th>
+                    <th>Tdk Ada</th>
+                    <th>Baik</th>
+                    <th>Rusak</th>
+                  </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+              </table>
+            </div>
 
-          <table style="width: 100%; font-size: 8.5pt; margin-bottom: 6px; vertical-align: top;">
-            <tr>
-              <td style="width: 65%; vertical-align: top;">
-                <table style="width: 100%; line-height: 1.25;">
-                  <tr><td style="width: 68px;">Jenis KDO</td><td style="width: 8px;">:</td><td><strong>${cfg.jenisKdo}</strong></td></tr>
-                  <tr><td>No.Unit</td><td>:</td><td>-</td></tr>
-                  <tr><td>TNKB</td><td>:</td><td><strong>${cfg.tnkb}</strong></td></tr>
-                  <tr><td>Pos</td><td>:</td><td>${cfg.pos}</td></tr>
-                  <tr><td>UPT</td><td>:</td><td>${cfg.kantorUpt}</td></tr>
-                  <tr><td style="vertical-align: top;">SKPD</td><td style="vertical-align: top;">:</td><td>${cfg.skpd}</td></tr>
+            <div style="margin-top: 12px;">
+              <div style="font-size: 8.5pt; line-height: 1.35; white-space: pre-wrap; margin-bottom: 14px;"><strong>KETERANGAN :</strong><br/>${ketText}</div>
+
+              <div style="font-size: 9pt; padding-bottom: 10px;">
+                <table class="no-border-table" style="width: 100%; text-align: center;">
+                  <tr>
+                    <td style="width: 50%; vertical-align: top;">
+                      <div>Jakarta, ${tglStr}</div>
+                      <div style="font-weight: bold;">Kepala Regu Naik Piket</div>
+                      ${sigNaik}
+                      <div style="font-weight: bold; text-decoration: underline;">${naikNama}</div>
+                    </td>
+                    <td style="width: 50%; vertical-align: top;">
+                      <div>Jakarta, ${tglStr}</div>
+                      <div style="font-weight: bold;">Kepala Regu Lepas Piket</div>
+                      ${sigLepas}
+                      <div style="font-weight: bold; text-decoration: underline;">${lepasNama}</div>
+                    </td>
+                  </tr>
                 </table>
-              </td>
-              <td style="width: 35%; vertical-align: top; padding-left: 12px;">
-                <table style="width: 100%; line-height: 1.35;">
-                  <tr><td style="width: 72px;">Hari</td><td style="width: 8px;">:</td><td>${escapeHtml(st.hari)}</td></tr>
-                  <tr><td>Tgl/Bln/Thn</td><td>:</td><td>${tglStr}</td></tr>
-                  <tr><td>Group</td><td>:</td><td>${escapeHtml(st.regu)}</td></tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-
-          <table class="official-table table-eight"><colgroup><col style="width:4%"><col style="width:30%"><col style="width:11%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:27%"></colgroup>
-            <thead>
-              <tr>
-                <th rowspan="2">No</th>
-                <th class="text-col" rowspan="2">Nama Peralatan</th>
-                <th rowspan="2" style="width: 72px;">Jumlah<br/>Satuan</th>
-                <th colspan="2" style="width: 86px;">Status</th>
-                <th colspan="2" style="width: 86px;">Kondisi</th>
-                <th class="text-col" rowspan="2" style="width: 120px;">Keterangan</th>
-              </tr>
-              <tr>
-                <th style="width: 42px;">Ada</th>
-                <th style="width: 44px;">Tdk Ada</th>
-                <th style="width: 42px;">Baik</th>
-                <th style="width: 44px;">Rusak</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowsHtml}
-              ${blankRowsHtml}
-            </tbody>
-          </table>
-
-          <div style="margin-top: 4px; font-size: 7pt;">
-            <table style="width: 100%; text-align: center;">
-              <tr>
-                <td style="width: 50%; vertical-align: top;">
-                  <div>Jakarta, ${tglStr}</div>
-                  <div style="font-weight: bold;">Kepala Regu Naik Piket</div>
-                  ${sigNaik}
-                  <div style="font-weight: bold; text-decoration: underline;">${naikNama}</div>
-                </td>
-                <td style="width: 50%; vertical-align: top;">
-                  <div>Jakarta, ${tglStr}</div>
-                  <div style="font-weight: bold;">Kepala Regu Lepas Piket</div>
-                  ${sigLepas}
-                  <div style="font-weight: bold; text-decoration: underline;">${lepasNama}</div>
-                </td>
-              </tr>
-            </table>
-          </div>
+              </div>
+            </div>
+          </section>
         `;
       }
-      const extraPrint = `<div style="margin-top:4px;font-size:7pt;border:1px solid #999;padding:3px;white-space:pre-wrap;"><strong>KETERANGAN</strong><br>${escapeHtml(st.keteranganUmum || [st.catatanKondisiUnit, st.jurnalKegiatan].filter(Boolean).join('\n\n') || '-')}</div>`;
-      container.insertAdjacentHTML('beforeend', extraPrint);
+    }
+
+    function renderOfficialPrintLayout() {
+      const container = document.getElementById('printContainer');
+      container.innerHTML = buildOfficialDailySheetHtml(getActiveState());
     }
 
     function updateOutputs() {
@@ -1890,7 +2139,7 @@
     }
 
     // =========================================================================
-    // 10. CLIPBOARD & SHARE WHATSAPP
+    // 10. CLIPBOARD, TANDA TANGAN DIGITAL & ENGINE EKSPOR F4 (PDF + JPG)
     // =========================================================================
     function copyTextSafe(text, successMsg) {
       const textarea = document.createElement('textarea');
@@ -1913,75 +2162,347 @@
     }
 
     function setupSignaturePad(canvasId, clearId, stateKey) {
-      const canvas=document.getElementById(canvasId), ctx=canvas.getContext('2d');
-      ctx.strokeStyle='#111827'; ctx.lineWidth=4; ctx.lineCap='round'; ctx.lineJoin='round';
-      const restore=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);const src=getActiveState()[stateKey];if(src){const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,canvas.width,canvas.height);im.src=src;}};
-      let drawing=false;
-      const pt=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height};};
-      canvas.addEventListener('pointerdown',e=>{if(!isCurrentShiftEditable())return;drawing=true;canvas.setPointerCapture(e.pointerId);const p=pt(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
-      canvas.addEventListener('pointermove',e=>{if(!drawing)return;const p=pt(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
-      const finish=()=>{if(!drawing)return;drawing=false;getActiveState()[stateKey]=canvas.toDataURL('image/png');saveActiveState();updateOutputs();};
-      canvas.addEventListener('pointerup',finish);canvas.addEventListener('pointercancel',finish);
-      document.getElementById(clearId).addEventListener('click',()=>{ctx.clearRect(0,0,canvas.width,canvas.height);getActiveState()[stateKey]='';saveActiveState();updateOutputs();});
-      canvas._restore=restore; restore();
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const applyStrokeStyle = () => {
+        ctx.strokeStyle = '#111827';
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+      };
+      applyStrokeStyle();
+
+      const restore = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        applyStrokeStyle();
+        const src = getActiveState()[stateKey];
+        if (src) {
+          const im = new Image();
+          im.onload = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(im, 0, 0, canvas.width, canvas.height);
+          };
+          im.src = src;
+        }
+      };
+
+      let drawing = false;
+      const pt = e => {
+        const r = canvas.getBoundingClientRect();
+        return {
+          x: (e.clientX - r.left) * (canvas.width / r.width),
+          y: (e.clientY - r.top) * (canvas.height / r.height)
+        };
+      };
+
+      canvas.addEventListener('pointerdown', e => {
+        if (!isCurrentShiftEditable()) return;
+        drawing = true;
+        canvas.setPointerCapture(e.pointerId);
+        applyStrokeStyle();
+        const p = pt(e);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+      });
+
+      canvas.addEventListener('pointermove', e => {
+        if (!drawing) return;
+        const p = pt(e);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+      });
+
+      const finish = () => {
+        if (!drawing) return;
+        drawing = false;
+        getActiveState()[stateKey] = canvas.toDataURL('image/png');
+        saveActiveState();
+        updateOutputs();
+      };
+
+      canvas.addEventListener('pointerup', finish);
+      canvas.addEventListener('pointercancel', finish);
+      document.getElementById(clearId).addEventListener('click', () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        getActiveState()[stateKey] = '';
+        saveActiveState();
+        updateOutputs();
+      });
+
+      canvas._restore = restore;
+      restore();
     }
 
-    async function downloadJpg(element, filename, scale=2) {
-      if(!window.html2canvas){showToast('Komponen JPG belum termuat; periksa koneksi internet.');return;}
-      const hasPages=element.querySelectorAll && element.querySelectorAll('.print-page').length>0;
-      const sources=hasPages ? Array.from(element.querySelectorAll('.print-page')) : [element];
-      const base=filename.replace(/\.jpg$/i,'');
-      for(let index=0; index<sources.length; index++){
-        const stage=document.createElement('div');
-        stage.style.cssText='position:fixed;left:-16000px;top:0;width:1123px;background:#fff;z-index:-1;';
-        const page=document.createElement('div');
-        page.className='report-export-page';
-        page.style.cssText='width:1123px;min-height:794px;padding:19px 25px;box-sizing:border-box;background:#fff;color:#111;font-family:Times New Roman,serif;font-size:9px;line-height:1.12;overflow:visible;';
-        page.innerHTML=sources[index].innerHTML;
-        const style=document.createElement('style');
-        style.textContent=`
-          .report-export-page,.report-export-page *{box-sizing:border-box;max-width:100%;font-family:"Times New Roman",serif!important}
-          .report-export-page table{border-collapse:collapse;width:100%;table-layout:fixed}
-          .report-export-page th,.report-export-page td{border:.55pt solid #667085!important;padding:3.2pt 5pt!important;font-size:7.4pt!important;line-height:1.18!important;vertical-align:middle!important;white-space:normal!important;overflow-wrap:break-word!important;word-break:normal!important}
-          .report-export-page th{background:#e9edf2!important;font-weight:bold!important;text-align:center!important}
-          .report-export-page td.text-col,.report-export-page th.text-col{text-align:left!important}
-          .report-export-page td.number-col,.report-export-page th.number-col{text-align:right!important;font-variant-numeric:tabular-nums}
-          .report-export-page td.center-col,.report-export-page th.center-col{text-align:center!important}
-          .report-export-page tr:nth-child(even){background:#f7f9fb}
-          .report-export-page img{max-height:34px!important;max-width:130px!important;object-fit:contain}
-          .report-export-page h1,.report-export-page h2{font-size:12pt!important;line-height:1.15!important;margin:0 0 4px!important;text-align:center}
-          .report-export-page h3{font-size:9pt!important;margin:3px 0 7px!important;text-align:center}
-          .report-export-page .official-table{width:100%!important;table-layout:fixed!important;margin:4px 0 0!important}
-          .report-export-page .print-page{padding:0!important;width:100%!important}
-        `;
-        stage.append(style,page);document.body.appendChild(stage);
-        try{
-          if(document.fonts&&document.fonts.ready) await document.fonts.ready;
-          await Promise.all(Array.from(page.querySelectorAll('img')).map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;})));
-          const canvas=await html2canvas(page,{scale:Math.max(2,scale),backgroundColor:'#ffffff',useCORS:true,allowTaint:false,logging:false,windowWidth:1123,scrollX:0,scrollY:0});
-          const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.97));
-          if(!blob)throw new Error('Gagal membuat gambar JPG.');
-          const url=URL.createObjectURL(blob),a=document.createElement('a');
-          a.href=url;a.download=sources.length>1?`${base}_Halaman_${index+1}.jpg`:`${base}.jpg`;
-          document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-        }finally{stage.remove();}
-        if(sources.length>1) await new Promise(resolve=>setTimeout(resolve,350));
+    // Helper merender satu halaman F4 (215mm x 330mm -> 813px x 1247px) ke Canvas resolusi tinggi
+    async function renderF4PageToCanvas(sourceEl, scale = 2.2, landscape = false) {
+      const pageWidthPx = landscape ? 1247 : 813;
+      const pageMinHeightPx = landscape ? 813 : 1247;
+
+      const stage = document.createElement('div');
+      stage.style.cssText = `position:fixed;left:-16000px;top:0;width:${pageWidthPx}px;background:#fff;z-index:-1;`;
+      const page = document.createElement('div');
+      page.className = 'report-export-page';
+      page.style.cssText = `width:${pageWidthPx}px;min-height:${pageMinHeightPx}px;padding:24px 30px 28px 30px;box-sizing:border-box;background:#fff;color:#111;font-family:"Times New Roman",Times,serif;font-size:10pt;line-height:1.25;display:flex;flex-direction:column;justify-content:space-between;overflow:visible;`;
+      page.innerHTML = sourceEl.innerHTML;
+
+      // Pastikan elemen wrapper bagian dalam mengisi tinggi penuh F4 secara proporsional
+      const innerSection = page.querySelector('.f4-portrait-sheet');
+      if (innerSection) {
+        innerSection.style.minHeight = `${pageMinHeightPx - 52}px`;
+        innerSection.style.display = 'flex';
+        innerSection.style.flexDirection = 'column';
+        innerSection.style.justifyContent = 'space-between';
+      }
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .report-export-page, .report-export-page * {
+          box-sizing: border-box;
+          max-width: 100%;
+          font-family: "Times New Roman", Times, serif !important;
+        }
+        .report-export-page table.no-border-table,
+        .report-export-page table.no-border-table th,
+        .report-export-page table.no-border-table td {
+          border: none !important;
+          background: transparent !important;
+        }
+        .report-export-page table.official-table {
+          border-collapse: collapse !important;
+          width: 100% !important;
+          table-layout: fixed !important;
+          margin: 0 !important;
+        }
+        .report-export-page table.official-table th,
+        .report-export-page table.official-table td {
+          border: 0.65pt solid #334155 !important;
+          padding: 4pt 5pt !important;
+          font-size: 8.2pt !important;
+          line-height: 1.24 !important;
+          vertical-align: middle !important;
+          white-space: normal !important;
+          overflow-wrap: break-word !important;
+          word-break: normal !important;
+        }
+        .report-export-page table.official-table th {
+          background: #e9edf2 !important;
+          font-weight: bold !important;
+          text-align: center !important;
+          white-space: nowrap !important;
+          padding: 5pt 4pt !important;
+        }
+        .report-export-page table.official-table td.text-col,
+        .report-export-page table.official-table th.text-col {
+          text-align: left !important;
+        }
+        .report-export-page table.official-table td.number-col,
+        .report-export-page table.official-table th.number-col {
+          text-align: right !important;
+          font-variant-numeric: tabular-nums;
+          white-space: nowrap !important;
+        }
+        .report-export-page table.official-table td.center-col,
+        .report-export-page table.official-table th.center-col {
+          text-align: center !important;
+          white-space: nowrap !important;
+        }
+        .report-export-page table.official-table tbody tr:nth-child(even) {
+          background: #f8fafc !important;
+        }
+        .report-export-page img {
+          height: 52px !important;
+          width: auto !important;
+          max-width: 180px !important;
+          display: block !important;
+          margin: 0 auto !important;
+          transform: none !important;
+        }
+      `;
+      stage.append(style, page);
+      document.body.appendChild(stage);
+
+      try {
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
+        await Promise.all(
+          Array.from(page.querySelectorAll('img')).map(img =>
+            img.complete
+              ? Promise.resolve()
+              : new Promise(resolve => { img.onload = resolve; img.onerror = resolve; })
+          )
+        );
+        return await html2canvas(page, {
+          scale: Math.max(2, scale),
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          allowTaint: false,
+          logging: false,
+          windowWidth: pageWidthPx,
+          scrollX: 0,
+          scrollY: 0
+        });
+      } finally {
+        stage.remove();
       }
     }
-    function isProblemForRecord(i){return !!(i.checked&&(i.status==='tdk_ada'||i.condition==='rusak'));}
-    async function fetchMonthRecords(ym){
-      const [y,m]=ym.split('-').map(Number),start=ym+'-01',end=new Date(y,m,0).toISOString().slice(0,10);
-      const snap=await db.collection('ceklis_harian').where('tanggal','>=',start).where('tanggal','<=',end).get();
-      return snap.docs.map(d=>d.data()).filter(x=>x.unit_id===activeUnitId&&x.payload&&x.record_type!=='master').map(x=>x.payload).sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+
+    async function downloadJpg(element, filename, scale = 2.4, landscape = false) {
+      if (!window.html2canvas) {
+        showToast('Komponen JPG belum termuat; periksa koneksi internet.');
+        return;
+      }
+      const hasPages = element.querySelectorAll && element.querySelectorAll('.print-page').length > 0;
+      const sources = hasPages ? Array.from(element.querySelectorAll('.print-page')) : [element];
+      const base = filename.replace(/\.jpg$/i, '');
+
+      for (let index = 0; index < sources.length; index++) {
+        const canvas = await renderF4PageToCanvas(sources[index], scale, landscape);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.97));
+        if (!blob) throw new Error('Gagal membuat gambar JPG.');
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = sources.length > 1 ? `${base}_Halaman_${index + 1}.jpg` : `${base}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        if (sources.length > 1) await new Promise(resolve => setTimeout(resolve, 350));
+      }
+      showToast('Unduhan JPG ukuran F4 berhasil!');
     }
-    function monthTitle(ym){const [y,m]=ym.split('-').map(Number);return new Intl.DateTimeFormat('id-ID',{month:'long',year:'numeric'}).format(new Date(y,m-1,1));}
-    function monthlySummaryHtml(records,ym){
-      const cfg=getActiveConfig(),rows=records.map(st=>`<tr><td>${formatIndonesianDate(st.tanggal)}</td><td>${escapeHtml(st.regu||getGroupForDutyDate(st.tanggal))}</td><td>${st.items.filter(i=>i.checked&&!isProblemForRecord(i)).length}/${st.items.length}</td><td>${st.items.filter(isProblemForRecord).length}</td><td>${escapeHtml(st.karuNaikNama||'-')} / ${escapeHtml(st.karuLepasNama||'-')}</td><td>${escapeHtml(st.keteranganUmum||'').replace(/\n/g,' ').slice(0,90)}</td></tr>`).join('');
-      return `<div style="background:#fff;color:#111;padding:24px;width:1047px;max-width:1047px;box-sizing:border-box;font-family:Arial"><h2 style="text-align:center;margin:0">${escapeHtml(cfg.printTitle)}</h2><h3 style="text-align:center;margin:5px 0 16px">REKAPITULASI BULAN ${monthTitle(ym).toUpperCase()}</h3><p><b>Armada:</b> ${cfg.jenisKdo} (${cfg.tnkb}) &nbsp; <b>Pos:</b> ${cfg.pos}</p><table class="official-table table-six" style="font-size:10px"><colgroup><col style="width:13%"><col style="width:10%"><col style="width:14%"><col style="width:10%"><col style="width:22%"><col style="width:31%"></colgroup><thead><tr>${['Tanggal','Group','Baik / Dicek','Temuan','Karu Naik / Lepas','Keterangan'].map(x=>`<th style="border:1px solid #333;padding:6px;background:#eee">${x}</th>`).join('')}</tr></thead><tbody>${rows||'<tr><td colspan="6" style="border:1px solid #333;padding:8px">Belum ada data.</td></tr>'}</tbody></table><p style="font-size:11px">Jumlah lembar harian tersimpan: ${records.length}</p></div>`;
+
+    // Ekspor PDF langsung ke ukuran resmi F4 / Folio (215mm x 330mm) — 1 lembar penuh per hari tanpa memotong tanda tangan
+    async function downloadPdfF4(element, filename, landscape = false) {
+      const jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
+      if (!jsPDFCtor || !window.html2canvas) {
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        window.print();
+        return;
+      }
+
+      showToast('Menyiapkan dokumen PDF ukuran F4 (215 x 330 mm)...');
+      const hasPages = element.querySelectorAll && element.querySelectorAll('.print-page').length > 0;
+      const sources = hasPages ? Array.from(element.querySelectorAll('.print-page')) : [element];
+
+      const pdf = new jsPDFCtor({
+        orientation: landscape ? 'landscape' : 'portrait',
+        unit: 'mm',
+        format: [215, 330],
+        compress: true
+      });
+
+      const pageW = pdf.internal.pageSize.getWidth();   // 215mm portrait atau 330mm landscape
+      const pageH = pdf.internal.pageSize.getHeight();  // 330mm portrait atau 215mm landscape
+
+      for (let index = 0; index < sources.length; index++) {
+        if (index > 0) {
+          pdf.addPage([215, 330], landscape ? 'landscape' : 'portrait');
+        }
+        const canvas = await renderF4PageToCanvas(sources[index], 2.1, landscape);
+        const imgData = canvas.toDataURL('image/jpeg', 0.96);
+
+        // Skala proporsional agar seluruh halaman (termasuk tanda tangan bawah) selalu muat 100% dalam 1 lembar F4
+        const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
+        const imgW = canvas.width * ratio;
+        const imgH = canvas.height * ratio;
+        const offsetX = Math.max(0, (pageW - imgW) / 2);
+        const offsetY = 0;
+
+        pdf.addImage(imgData, 'JPEG', offsetX, offsetY, imgW, imgH, undefined, 'FAST');
+      }
+
+      pdf.save(filename);
+      showToast(`Unduhan ${filename} (F4) selesai!`);
     }
-    function monthlyDetailHtml(records){
-      const cfg=getActiveConfig();
-      return records.map(st=>{const rows=st.items.map((i,n)=>`<tr><td>${n+1}</td><td>${escapeHtml(i.name)}</td><td>${i.qty} ${escapeHtml(i.unit)}</td><td>${i.checked?(i.status==='tdk_ada'?'Tidak ada':'Ada'):''}</td><td>${i.checked?(i.condition==='rusak'?'Rusak':'Baik'):''}</td><td>${escapeHtml(i.note||'')}</td></tr>`).join('');return `<section class="print-page" style="padding:10mm;font-family:'Times New Roman',serif;color:#111"><h3 style="text-align:center">${escapeHtml(cfg.printTitle)}<br/>LEMBAR CEKLIS HARIAN</h3><p><b>Armada:</b> ${cfg.jenisKdo} (${cfg.tnkb}) &nbsp; <b>Tanggal:</b> ${formatIndonesianDate(st.tanggal)} &nbsp; <b>Group:</b> ${escapeHtml(st.regu||getGroupForDutyDate(st.tanggal))}</p><table class="official-table table-detail"><colgroup><col style="width:5%"><col style="width:30%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:26%"></colgroup><thead><tr><th>No</th><th>Nama Peralatan</th><th>Jumlah Standar</th><th>Status</th><th>Kondisi</th><th>Keterangan</th></tr></thead><tbody>${rows}</tbody></table><p style="border:1px solid #999;padding:7px;white-space:pre-wrap"><b>Keterangan:</b><br/>${escapeHtml(st.keteranganUmum||'-')}</p><table style="width:100%;text-align:center;margin-top:16px"><tr><td style="width:50%">Kepala Regu Naik Piket<br/><img style="height:48px;max-width:180px" src="${st.tandaTanganNaik||''}"/><br/><b>${escapeHtml(st.karuNaikNama||'')}</b></td><td>Kepala Regu Lepas Piket<br/><img style="height:48px;max-width:180px" src="${st.tandaTanganLepas||''}"/><br/><b>${escapeHtml(st.karuLepasNama||'')}</b></td></tr></table></section>`;}).join('');
+
+    function isProblemForRecord(i) {
+      return !!(i.checked && (i.status === 'tdk_ada' || i.condition === 'rusak'));
+    }
+
+    async function fetchMonthRecords(ym) {
+      const [y,m] = ym.split('-').map(Number);
+      const start = ym + '-01';
+      const end = new Date(y, m, 0).toISOString().slice(0, 10);
+      const snap = await db.collection('ceklis_harian').where('tanggal', '>=', start).where('tanggal', '<=', end).get();
+      return snap.docs
+        .map(d => d.data())
+        .filter(x => x.unit_id === activeUnitId && x.payload && x.record_type !== 'master')
+        .map(x => x.payload)
+        .sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+    }
+
+    function monthTitle(ym) {
+      const [y,m] = ym.split('-').map(Number);
+      return new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(new Date(y, m - 1, 1));
+    }
+
+    function monthlySummaryHtml(records, ym) {
+      const cfg = getActiveConfig();
+      const rows = records.map(st => `
+        <tr>
+          <td class="center-col">${formatIndonesianDate(st.tanggal)}</td>
+          <td class="center-col">${escapeHtml(st.regu || getGroupForDutyDate(st.tanggal))}</td>
+          <td class="center-col">${st.items.filter(i => i.checked && !isProblemForRecord(i)).length}/${st.items.length}</td>
+          <td class="center-col">${st.items.filter(isProblemForRecord).length}</td>
+          <td class="text-col">${escapeHtml(st.karuNaikNama || '-')} / ${escapeHtml(st.karuLepasNama || '-')}</td>
+          <td class="text-col">${escapeHtml(st.keteranganUmum || '').replace(/\n/g, ' ').slice(0, 140)}</td>
+        </tr>
+      `).join('');
+
+      return `
+        <section class="print-page" style="background:#fff;color:#111;font-family:'Times New Roman',Times,serif;">
+          <div>
+            <h2 style="text-align:center;margin:0;font-size:11.5pt;font-weight:bold;">${escapeHtml(cfg.printTitle)}</h2>
+            <h3 style="text-align:center;margin:4px 0 14px;font-size:10pt;font-weight:bold;">REKAPITULASI BULAN ${monthTitle(ym).toUpperCase()}</h3>
+            <table class="no-border-table" style="width:100%;margin-bottom:10px;font-size:9pt;font-weight:bold;">
+              <tr>
+                <td style="width:80px;">Armada</td><td style="width:10px;">:</td><td>${cfg.jenisKdo} (${cfg.tnkb})</td>
+                <td style="text-align:right;">Pos : ${cfg.pos}</td>
+              </tr>
+            </table>
+            <table class="official-table table-six">
+              <colgroup>
+                <col style="width:14%">
+                <col style="width:9%">
+                <col style="width:11%">
+                <col style="width:8%">
+                <col style="width:24%">
+                <col style="width:34%">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Group</th>
+                  <th>Baik / Dicek</th>
+                  <th>Temuan</th>
+                  <th class="text-col">Karu Naik / Lepas</th>
+                  <th class="text-col">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody>${rows || '<tr><td colspan="6" class="center-col">Belum ada data pada bulan ini.</td></tr>'}</tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px;font-size:8.5pt;">Jumlah lembar harian tersimpan: ${records.length}</div>
+        </section>
+      `;
+    }
+
+    function monthlyDetailHtml(records) {
+      if (!records || records.length === 0) {
+        return `<section class="print-page"><p style="text-align:center;font-size:10pt;">Belum ada data ceklis harian tersimpan pada bulan yang dipilih.</p></section>`;
+      }
+      // Menggunakan format lembar harian F4 resmi yang sama persis: 1 lembar penuh per hari
+      return records.map(st => buildOfficialDailySheetHtml(st)).join('');
+    }
+
+    function setPrintPaperSize(orientation = 'portrait') {
+      const styleEl = document.getElementById('dynamicPageStyle');
+      if (!styleEl) return;
+      if (orientation === 'landscape') {
+        styleEl.textContent = '@page { size: 330mm 215mm; margin: 7mm 9mm; }';
+      } else {
+        styleEl.textContent = '@page { size: 215mm 330mm; margin: 7mm 9mm; }';
+      }
     }
 
     // =========================================================================
@@ -1992,23 +2513,39 @@
       syncUrlParam(activeUnitId);
 
       // Penguncian sisi aplikasi: periode selain shift aktif hanya dapat dibaca.
-      const isAllowedWhileLocked = el => !!(el.closest('#inputTanggal') || el.closest('#searchInput') || el.closest('#clearSearchBtn') || el.closest('.filter-btn') || el.closest('#resetFilterBtn') || el.closest('#unitSelector') || el.closest('#openQrModalBtn') || el.closest('#copyWaBtn') || el.closest('#sendWaBtn') || el.closest('#printPdfBtn') || el.closest('#qrModal'));
+      const isAllowedWhileLocked = el => !!(
+        el.closest('#inputTanggal') ||
+        el.closest('#searchInput') ||
+        el.closest('#clearSearchBtn') ||
+        el.closest('.filter-btn') ||
+        el.closest('#resetFilterBtn') ||
+        el.closest('#unitSelector') ||
+        el.closest('#openQrModalBtn') ||
+        el.closest('#copyWaBtn') ||
+        el.closest('#sendWaBtn') ||
+        el.closest('#downloadReportBtn') ||
+        el.closest('#downloadScope') ||
+        el.closest('#downloadFormat') ||
+        el.closest('#printMonth') ||
+        el.closest('#monthlyMode') ||
+        el.closest('#qrModal')
+      );
       ['click','input','change'].forEach(evt => document.addEventListener(evt, e => {
         if (isCurrentShiftEditable() || isAllowedWhileLocked(e.target)) return;
         if (e.target.closest('#metaFormContainer') || e.target.closest('#equipmentList') || e.target.closest('#markAllNormalBtn') || e.target.closest('#resetChecklistBtn') || e.target.closest('#addEquipmentBtn') || e.target.closest('#generalRemarks')) {
-          e.preventDefault(); e.stopImmediatePropagation(); showToast('Laporan terkunci. Data hanya dapat dilihat.');
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          showToast('Laporan terkunci. Data hanya dapat dilihat.');
         }
       }, true));
-
 
       // Mulai sinkronisasi harian real-time Firebase untuk hari ini
       Promise.all(Object.keys(UNITS_CONFIG).map(loadStandardOverrides)).then(() => listenDailyData(activeUnitId, getCurrentDutyDateISO()));
 
-      // Pemilih Multi-Unit (Dropdown & Pill)
+      // Pemilih Multi-Unit
       document.getElementById('unitSelector').addEventListener('change', (e) => {
         switchUnit(e.target.value);
       });
-
 
       // Toggle kartu data piket
       document.getElementById('toggleMetaBtn').addEventListener('click', () => {
@@ -2041,7 +2578,7 @@
         });
       });
 
-      // Input Nama & NIP/NRK Kepala Regu
+      // Input Nama Kepala Regu
       const bindMeta = (domId, prop) => {
         document.getElementById(domId).addEventListener('input', (e) => {
           getActiveState()[prop] = e.target.value;
@@ -2053,21 +2590,32 @@
       bindMeta('karuLepasNama', 'karuLepasNama');
       setupSignaturePad('karuNaikSignature','clearKaruNaikSignature','tandaTanganNaik');
       setupSignaturePad('karuLepasSignature','clearKaruLepasSignature','tandaTanganLepas');
+
       document.getElementById('generalRemarks').addEventListener('input', e => {
         if (!isCurrentShiftEditable()) return;
         getActiveState().keteranganUmum = e.target.value;
-        saveActiveState(); updateOutputs();
+        saveActiveState();
+        updateOutputs();
       });
+
       document.getElementById('addEquipmentBtn').addEventListener('click', () => {
         if (!isCurrentShiftEditable()) return;
         const nameEl = document.getElementById('newEquipmentName');
         const qtyEl = document.getElementById('newEquipmentQty');
-        const name = nameEl.value.trim(); const qty = Math.max(1, parseInt(qtyEl.value, 10) || 1);
+        const name = nameEl.value.trim();
+        const qty = Math.max(1, parseInt(qtyEl.value, 10) || 1);
         if (!name) { showToast('Masukkan nama peralatan terlebih dahulu.'); return; }
-        const st = getActiveState(); const id = Math.max(0, ...st.items.map(i => Number(i.id) || 0)) + 1;
+        const st = getActiveState();
+        const id = Math.max(0, ...st.items.map(i => Number(i.id) || 0)) + 1;
         const newItem = { id, name, qty, unit: 'Buah', checked: false, status: 'ada', condition: 'baik', goodQty: qty, badQty: 0, note: '', showNote: false, custom: true };
-        st.items.push(newItem); getActiveConfig().items.push({...newItem});
-        nameEl.value = ''; qtyEl.value = '1'; saveActiveState(); updateStatsAndProgress(); renderEquipmentList(); updateOutputs();
+        st.items.push(newItem);
+        getActiveConfig().items.push({...newItem});
+        nameEl.value = '';
+        qtyEl.value = '1';
+        saveActiveState();
+        updateStatsAndProgress();
+        renderEquipmentList();
+        updateOutputs();
         saveMasterData(activeUnitId).then(()=>showToast(`Peralatan "${name}" ditambahkan dan tersinkron ke cloud.`)).catch(e=>showToast(`Tersimpan di HP, cloud menolak: ${e.code || e.message}`));
       });
 
@@ -2085,7 +2633,7 @@
         updateStatsAndProgress();
         renderEquipmentList();
         updateOutputs();
-        showToast('Semua 35 item ditandai Normal & tersinkron');
+        showToast('Semua item ditandai Normal & tersinkron');
       });
 
       // Tombol Reset Ceklis (Konfirmasi Modal)
@@ -2110,6 +2658,7 @@
           item.note = '';
           item.showNote = false;
         });
+        editingNoteItemId = null;
         saveActiveState();
         updateStatsAndProgress();
         renderEquipmentList();
@@ -2218,34 +2767,63 @@
       document.getElementById('sendWaBtn').addEventListener('click', () => { const encoded=encodeURIComponent(generateWhatsAppText()); window.open(`https://api.whatsapp.com/send?text=${encoded}`,'_blank','noopener,noreferrer'); waModal.classList.add('hidden'); });
 
       document.getElementById('printMonth').value = new Date().toISOString().slice(0,7);
-      const scopeEl=document.getElementById('downloadScope'), formatEl=document.getElementById('downloadFormat');
-      const syncDownloadOptions=()=>{const monthly=scopeEl.value==='monthly';document.getElementById('downloadDailyOptions').classList.toggle('hidden',monthly);document.getElementById('downloadMonthlyOptions').classList.toggle('hidden',!monthly);};
-      scopeEl.addEventListener('change',syncDownloadOptions); syncDownloadOptions();
-      document.getElementById('downloadReportBtn').addEventListener('click', async()=>{
-        const scope=scopeEl.value, format=formatEl.value, pc=document.getElementById('printContainer');
-        const ym=document.getElementById('printMonth').value;
+      const scopeEl = document.getElementById('downloadScope'), formatEl = document.getElementById('downloadFormat');
+      const syncDownloadOptions = () => {
+        const monthly = scopeEl.value === 'monthly';
+        document.getElementById('downloadDailyOptions').classList.toggle('hidden', monthly);
+        document.getElementById('downloadMonthlyOptions').classList.toggle('hidden', !monthly);
+      };
+      scopeEl.addEventListener('change', syncDownloadOptions);
+      syncDownloadOptions();
+
+      document.getElementById('downloadReportBtn').addEventListener('click', async () => {
+        const scope = scopeEl.value, format = formatEl.value, pc = document.getElementById('printContainer');
+        const ym = document.getElementById('printMonth').value;
         try {
-          if(scope==='daily') {
-            renderOfficialPrintLayout(); pc.classList.remove('hidden');
-            if(format==='jpg') await downloadJpg(pc,`Ceklis_Harian_${activeUnitId}_${getActiveState().tanggal}.jpg`,2);
-            else { await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))); window.print(); }
+          if (scope === 'daily') {
+            setPrintPaperSize('portrait');
+            renderOfficialPrintLayout();
+            pc.classList.remove('hidden');
+            if (format === 'jpg') {
+              await downloadJpg(pc, `Ceklis_Harian_${activeUnitId}_${getActiveState().tanggal}.jpg`, 2.4, false);
+            } else {
+              await downloadPdfF4(pc, `Ceklis_Harian_${activeUnitId}_${getActiveState().tanggal}.pdf`, false);
+            }
             pc.classList.add('hidden');
             return;
           }
-          if(!ym) return showToast('Pilih bulan terlebih dahulu.');
-          const records=await fetchMonthRecords(ym), mode=document.getElementById('monthlyMode').value;
-          if(mode==='summary') {
-            const wrap=document.createElement('div'); wrap.innerHTML=monthlySummaryHtml(records,ym); wrap.style.position='fixed'; wrap.style.left='-12000px'; wrap.style.top='0'; document.body.appendChild(wrap);
-            if(format==='jpg') await downloadJpg(wrap.firstElementChild,`Rekap_Bulanan_${activeUnitId}_${ym}.jpg`,2);
-            else { pc.innerHTML=wrap.innerHTML; pc.classList.remove('hidden'); window.print(); pc.classList.add('hidden'); }
-            wrap.remove();
+
+          if (!ym) return showToast('Pilih bulan terlebih dahulu.');
+          const records = await fetchMonthRecords(ym), mode = document.getElementById('monthlyMode').value;
+          if (mode === 'summary') {
+            setPrintPaperSize('landscape');
+            pc.innerHTML = monthlySummaryHtml(records, ym);
+            pc.classList.remove('hidden');
+            if (format === 'jpg') {
+              await downloadJpg(pc, `Rekap_Bulanan_${activeUnitId}_${ym}.jpg`, 2.4, true);
+            } else {
+              await downloadPdfF4(pc, `Rekap_Bulanan_${activeUnitId}_${ym}.pdf`, true);
+            }
+            pc.classList.add('hidden');
+            renderOfficialPrintLayout();
           } else {
-            pc.innerHTML=monthlyDetailHtml(records); pc.classList.remove('hidden');
-            if(format==='jpg') await downloadJpg(pc,`Rincian_Bulanan_${activeUnitId}_${ym}.jpg`,1.25);
-            else { await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))); window.print(); }
-            pc.classList.add('hidden'); renderOfficialPrintLayout();
+            // Rincian ceklis harian sebulan penuh: F4 Portrait (215mm x 330mm), 1 lembar per hari
+            setPrintPaperSize('portrait');
+            pc.innerHTML = monthlyDetailHtml(records);
+            pc.classList.remove('hidden');
+            if (format === 'jpg') {
+              await downloadJpg(pc, `Rincian_Bulanan_${activeUnitId}_${ym}.jpg`, 2.1, false);
+            } else {
+              await downloadPdfF4(pc, `Rincian_Bulanan_${activeUnitId}_${ym}.pdf`, false);
+            }
+            pc.classList.add('hidden');
+            renderOfficialPrintLayout();
           }
-        } catch(e) { console.error('Gagal mengunduh laporan:',e); showToast(`Gagal mengunduh: ${e.code || e.message || 'periksa koneksi'}`); pc.classList.add('hidden'); }
+        } catch(e) {
+          console.error('Gagal mengunduh laporan:', e);
+          showToast(`Gagal mengunduh: ${e.code || e.message || 'periksa koneksi'}`);
+          pc.classList.add('hidden');
+        }
       });
     });
   </script>
