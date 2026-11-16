@@ -79,6 +79,17 @@
       #printContainer table {
         max-width: 100% !important;
       }
+      #printContainer table.official-table tr { height: auto !important; }
+      #printContainer table.official-table th,
+      #printContainer table.official-table td {
+        vertical-align: middle !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+        line-height: 1.2 !important;
+        height: auto !important;
+        padding: 4px 5px !important;
+        overflow: visible !important;
+        text-indent: 0 !important;
+      }
       #printContainer tr {
         break-inside: avoid;
         page-break-inside: avoid;
@@ -669,6 +680,72 @@
     @media (max-width: 600px) {
       #reportPreviewContent { font-size: 8px !important; }
       #reportPreviewContent .print-page { padding: 7px !important; }
+    }
+  </style>
+
+
+  <style id="export-table-alignment-fix">
+    /*
+      Penyamaan tipografi seluruh hasil ekspor: laporan harian, rekap bulanan,
+      rincian bulanan, PDF, JPG, serta salinan pratinjaunya.
+    */
+    #printContainer table.official-table th,
+    #printContainer table.official-table td,
+    #reportPreviewContent table.official-table th,
+    #reportPreviewContent table.official-table td,
+    .report-export-page table.official-table th,
+    .report-export-page table.official-table td {
+      display: table-cell !important;
+      vertical-align: middle !important;
+      font-family: Arial, Helvetica, sans-serif !important;
+      line-height: 1.2 !important;
+      padding-top: 4px !important;
+      padding-bottom: 4px !important;
+      box-sizing: border-box !important;
+      text-indent: 0 !important;
+    }
+
+    #printContainer table.official-table th,
+    #reportPreviewContent table.official-table th,
+    .report-export-page table.official-table th {
+      text-align: center !important;
+      font-weight: 700 !important;
+      line-height: 1.2 !important;
+      padding-top: 4px !important;
+      padding-bottom: 4px !important;
+    }
+
+    #printContainer table.official-table td.center-col,
+    #reportPreviewContent table.official-table td.center-col,
+    .report-export-page table.official-table td.center-col {
+      text-align: center !important;
+    }
+
+    #printContainer table.official-table td.text-col,
+    #reportPreviewContent table.official-table td.text-col,
+    .report-export-page table.official-table td.text-col {
+      text-align: left !important;
+      padding-left: 5pt !important;
+      padding-right: 5pt !important;
+    }
+
+    /* Samakan juga tabel informasi/tanda tangan yang memiliki garis. */
+    #printContainer table:not(.no-border-table) th,
+    #printContainer table:not(.no-border-table) td,
+    #reportPreviewContent table:not(.no-border-table) th,
+    #reportPreviewContent table:not(.no-border-table) td {
+      vertical-align: middle !important;
+    }
+
+    #reportPreviewContent table.official-table tr { height: auto !important; }
+    #reportPreviewContent table.official-table th,
+    #reportPreviewContent table.official-table td {
+      font-family: Arial, Helvetica, sans-serif !important;
+      line-height: 1.2 !important;
+      height: auto !important;
+      padding: 4px 5px !important;
+      overflow: visible !important;
+      vertical-align: middle !important;
     }
   </style>
 
@@ -2805,23 +2882,52 @@
           table-layout: fixed !important;
           margin: 0 !important;
         }
+        .report-export-page table.official-table {
+          border-collapse: collapse !important;
+          border-spacing: 0 !important;
+          width: 100% !important;
+          table-layout: fixed !important;
+        }
+        .report-export-page table.official-table tr {
+          height: auto !important;
+          min-height: 0 !important;
+        }
         .report-export-page table.official-table th,
         .report-export-page table.official-table td {
           border: 0.65pt solid #334155 !important;
-          padding: 3.4pt 4pt !important;
+          padding: 4px 5px !important;
+          height: auto !important;
+          min-height: 0 !important;
+          font-family: Arial, Helvetica, sans-serif !important;
           font-size: 8.2pt !important;
-          line-height: 1.24 !important;
+          line-height: 1.2 !important;
           vertical-align: middle !important;
+          text-indent: 0 !important;
+          box-sizing: border-box !important;
           white-space: normal !important;
-          overflow-wrap: anywhere !important;
+          overflow: visible !important;
+          overflow-wrap: break-word !important;
           word-break: normal !important;
+        }
+        .report-export-page table.official-table td > *,
+        .report-export-page table.official-table th > * {
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
+          font-family: Arial, Helvetica, sans-serif !important;
+          line-height: 1.2 !important;
+          vertical-align: middle !important;
         }
         .report-export-page table.official-table th {
           background: #e9edf2 !important;
-          font-weight: bold !important;
+          font-family: Arial, Helvetica, sans-serif !important;
+          font-weight: 700 !important;
           text-align: center !important;
-          white-space: nowrap !important;
-          padding: 5pt 4pt !important;
+          white-space: normal !important;
+          padding: 4px 5px !important;
+          line-height: 1.2 !important;
+          vertical-align: middle !important;
+          height: auto !important;
+          overflow: visible !important;
         }
         .report-export-page table.official-table td.text-col,
         .report-export-page table.official-table th.text-col {
@@ -2840,6 +2946,11 @@
         }
         .report-export-page table.official-table tbody tr:nth-child(even) {
           background: #f8fafc !important;
+        }
+        .report-export-page table:not(.no-border-table) th,
+        .report-export-page table:not(.no-border-table) td {
+          vertical-align: middle !important;
+          text-indent: 0 !important;
         }
         .report-export-page img {
           height: 52px !important;
@@ -2862,6 +2973,48 @@
               : new Promise(resolve => { img.onload = resolve; img.onerror = resolve; })
           )
         );
+
+        // Pusatkan teks dengan padding atas/bawah yang dihitung dari tinggi teks aktual.
+        // Ini menghindari bug vertical-align/flex html2canvas yang membuat teks turun
+        // mendekati garis bawah pada PDF/JPG di beberapa perangkat Android.
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        page.querySelectorAll('table.official-table').forEach(table => {
+          table.querySelectorAll('tr').forEach(tr => {
+            tr.querySelectorAll(':scope > th, :scope > td').forEach(cell => {
+              const cellRect = cell.getBoundingClientRect();
+              if (!cellRect.height) return;
+
+              const range = document.createRange();
+              range.selectNodeContents(cell);
+              const textRect = range.getBoundingClientRect();
+              range.detach();
+
+              if (!textRect.height) return;
+
+              // Hitung ruang kosong yang seimbang di atas dan bawah teks.
+              // Kurangi ketebalan border agar padding berada di dalam sel.
+              const borderTop = parseFloat(getComputedStyle(cell).borderTopWidth) || 0;
+              const borderBottom = parseFloat(getComputedStyle(cell).borderBottomWidth) || 0;
+              const innerHeight = Math.max(0, cellRect.height - borderTop - borderBottom);
+              const verticalSpace = Math.max(0, innerHeight - textRect.height);
+              const centeredPadding = verticalSpace / 2;
+
+              // Geser isi sedikit ke ATAS dari titik tengah matematis.
+              // Ruang atas dikurangi dan ruang bawah ditambah dengan jumlah yang sama,
+              // sehingga total tinggi sel tetap, tetapi teks tidak tampak turun dekat garis bawah.
+              const upwardShift = Math.min(3.5, centeredPadding);
+              const topPadding = Math.max(0, centeredPadding - upwardShift);
+              const bottomPadding = Math.max(0, verticalSpace - topPadding);
+
+              cell.style.setProperty('padding-top', `${topPadding}px`, 'important');
+              cell.style.setProperty('padding-bottom', `${bottomPadding}px`, 'important');
+              cell.style.setProperty('vertical-align', 'top', 'important');
+              cell.style.setProperty('height', `${cellRect.height}px`, 'important');
+              cell.style.setProperty('box-sizing', 'border-box', 'important');
+            });
+          });
+        });
+
         return await html2canvas(page, {
           scale: Math.max(2, scale),
           backgroundColor: '#ffffff',
@@ -2968,6 +3121,55 @@
       return new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(new Date(y, m - 1, 1));
     }
 
+    // Susun penjelasan temuan otomatis untuk kolom Keterangan pada rekap bulanan.
+    // Rincian dibuat singkat: nama peralatan + jenis temuan + catatan petugas (jika ada).
+    function monthlyFindingExplanation(st) {
+      const problems = (st.items || []).filter(isProblemForRecord);
+      return problems.map(item => {
+        const name = String(item.name || 'Peralatan');
+        const unit = String(item.unit || 'unit');
+        const note = String(item.note || '').trim();
+        let issue = '';
+
+        if (activeUnitId === 'B9006PHA') {
+          const good = Number(item.goodQty || 0);
+          const bad = Number(item.badQty || 0);
+          issue = bad > 0
+            ? (good > 0 ? `${good} baik, ${bad} rusak` : `${bad} rusak`)
+            : 'rusak';
+        } else if (item.status === 'tdk_ada') {
+          issue = 'tidak tersedia';
+        } else if (item.condition === 'rusak') {
+          const bad = Number(item.badQty || 0);
+          issue = Number(item.qty || 0) > 1 && bad > 0
+            ? `${bad} ${unit} rusak`
+            : 'rusak';
+        } else {
+          issue = 'perlu pemeriksaan';
+        }
+
+        return `${name}: ${issue}${note ? ` (${note})` : ''}`;
+      });
+    }
+
+    function monthlySummaryRemarks(st) {
+      // Ringkasan sangat singkat: nama peralatan + kondisi inti saja.
+      const findings = monthlyFindingExplanation(st);
+      if (!findings.length) return '-';
+      const concise = findings.map(text => {
+        const match = text.match(/^([^:]+):\\s*(.*)$/);
+        if (!match) return text;
+        const name = match[1].trim();
+        const issue = match[2].toLowerCase();
+        const status = issue.includes('tidak tersedia') ? 'tidak ada'
+          : issue.includes('rusak') ? 'rusak'
+          : 'perlu dicek';
+        return `${name} ${status}`;
+      });
+      const shown = concise.slice(0, 3);
+      return shown.join('; ') + (concise.length > 3 ? `; +${concise.length - 3} temuan` : '');
+    }
+
     function monthlySummaryHtml(records, ym) {
       const cfg = getActiveConfig();
       const rows = records.map(st => `
@@ -2977,7 +3179,7 @@
           <td class="center-col">${st.items.filter(i => i.checked && !isProblemForRecord(i)).length}/${st.items.length}</td>
           <td class="center-col">${st.items.filter(isProblemForRecord).length}</td>
           <td class="text-col">${escapeHtml(st.karuNaikNama || '-')} / ${escapeHtml(st.karuLepasNama || '-')}</td>
-          <td class="text-col">${escapeHtml(st.keteranganUmum || '').replace(/\n/g, ' ').slice(0, 140)}</td>
+          <td class="text-col">${escapeHtml(monthlySummaryRemarks(st))}</td>
         </tr>
       `).join('');
 
