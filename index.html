@@ -3622,6 +3622,67 @@
         }, { rootMargin: '-18% 0px -62% 0px', threshold: [0, .15, .35, .6] });
         navTargets.forEach(target => navObserver.observe(target));
       }
+
+      // Tombol Back Android/browser:
+      // 1) Jika halaman sedang di-scroll, kembali ke header paling atas.
+      // 2) Jika sudah berada di atas, Back berikutnya keluar dari webapp.
+      // Gunakan satu entri riwayat sementara agar Back pertama tidak langsung
+      // meninggalkan halaman ketika pengguna sedang membaca bagian bawah.
+      const backToTopState = { eCeklisBackGuard: true };
+      try {
+        history.pushState(backToTopState, '', location.href);
+      } catch (error) {
+        console.warn('Riwayat navigasi tidak dapat disiapkan:', error);
+      }
+
+      // Pola Back dua tahap seperti aplikasi sosial:
+      // - Saat masih di bawah: Back pertama kembali ke header.
+      // - Saat sudah di header: Back pertama menampilkan toast.
+      // - Back kedua dalam 2 detik dibiarkan keluar/navigasi normal.
+      let lastBackPressAt = 0;
+
+      window.addEventListener('popstate', () => {
+        const currentY = window.scrollY || document.documentElement.scrollTop || 0;
+
+        if (currentY > 8) {
+          lastBackPressAt = 0;
+          window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+          try {
+            history.pushState(backToTopState, '', location.href);
+          } catch (error) {
+            console.warn('Guard tombol Back gagal dipasang:', error);
+          }
+          return;
+        }
+
+        const now = Date.now();
+        if (lastBackPressAt && (now - lastBackPressAt) <= 2000) {
+          // Jangan pasang guard lagi: biarkan navigasi Back berjalan.
+          lastBackPressAt = 0;
+          return;
+        }
+
+        lastBackPressAt = now;
+        showToast('Tekan sekali lagi untuk keluar');
+
+        // Kembalikan guard setelah Back pertama agar halaman tetap terbuka.
+        try {
+          history.pushState(backToTopState, '', location.href);
+        } catch (error) {
+          console.warn('Guard tombol Back gagal dipasang:', error);
+        }
+      });
+
+      // Navigasi bawah hanya menggulir halaman, tidak menambah entri hash
+      // sehingga tidak mengganggu urutan tombol Back.
+      document.querySelectorAll('.bottom-nav-link[data-nav-target]').forEach(link => {
+        link.addEventListener('click', event => {
+          const target = document.getElementById(link.dataset.navTarget);
+          if (!target) return;
+          event.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
     });
   </script>
 </body>
