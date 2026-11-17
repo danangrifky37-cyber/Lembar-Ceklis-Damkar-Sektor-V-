@@ -648,6 +648,54 @@
   </style>
 
 
+  <style id="professional-back-navigation-styles">
+    html { scroll-behavior: smooth; }
+
+    /* Preview terasa seperti lembar aplikasi yang masuk dari bawah. */
+    #reportPreviewModal {
+      opacity: 0;
+      transition: opacity 220ms ease;
+      will-change: opacity;
+    }
+    #reportPreviewModal.is-visible { opacity: 1; }
+    #reportPreviewModal > div {
+      transform: translateY(18px) scale(.985);
+      opacity: .96;
+      transition: transform 280ms cubic-bezier(.2,.8,.2,1), opacity 220ms ease;
+      will-change: transform, opacity;
+    }
+    #reportPreviewModal.is-visible > div {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    #reportPreviewModal.is-closing > div {
+      transform: translateY(12px) scale(.99);
+      opacity: 0;
+    }
+
+    /* Toast keluar: ringan, jelas, dan tidak menutupi kontrol utama. */
+    #backExitToast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 92px);
+      z-index: 120;
+      transform: translate(-50%, 14px) scale(.97);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease, transform 260ms cubic-bezier(.2,.8,.2,1);
+    }
+    #backExitToast.is-visible {
+      transform: translate(-50%, 0) scale(1);
+      opacity: 1;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      #reportPreviewModal, #reportPreviewModal > div, #backExitToast {
+        transition-duration: 1ms !important;
+      }
+    }
+  </style>
+
   <style id="report-preview-styles">
     #reportPreviewModal { color: #171936; }
     #reportPreviewContent { width: 100%; max-width: 860px; }
@@ -1130,6 +1178,17 @@
       <div class="bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 border border-slate-700 whitespace-nowrap">
         <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
         <span id="toastMessage">Notifikasi</span>
+      </div>
+    </div>
+
+    <div id="backExitToast" aria-live="polite" role="status">
+      <div class="flex items-center gap-2 rounded-full border border-white/15 bg-slate-950/90 px-4 py-3 text-xs font-semibold text-white shadow-2xl backdrop-blur-xl">
+        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-white/10">
+          <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M12 8v4l2.5 2.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span>Tekan back sekali lagi untuk keluar</span>
       </div>
     </div>
 
@@ -3516,14 +3575,36 @@
       const reportPreviewPageCount = document.getElementById('reportPreviewPageCount');
       const previewViewport = document.getElementById('reportPreviewViewport');
       let pendingReportExport = null;
+      let previewHistoryOpen = false;
+      let previewCloseTimer = null;
 
-      function closeReportPreview() {
-        reportPreviewModal.classList.add('hidden');
-        reportPreviewContent.innerHTML = '';
-        pendingReportExport = null;
+      function closeReportPreview(fromBackNavigation = false) {
+        // Jika ditutup melalui tombol X/Kembali, gunakan satu langkah history.
+        // Event popstate kemudian menjalankan animasi tutup yang sama.
+        if (!fromBackNavigation && previewHistoryOpen) {
+          try {
+            history.back();
+            return;
+          } catch (error) {
+            console.warn('Riwayat preview tidak dapat ditutup:', error);
+          }
+        }
+
+        previewHistoryOpen = false;
+        reportPreviewModal.classList.remove('is-visible');
+        reportPreviewModal.classList.add('is-closing');
+
+        if (previewCloseTimer) clearTimeout(previewCloseTimer);
+        previewCloseTimer = setTimeout(() => {
+          reportPreviewModal.classList.add('hidden');
+          reportPreviewModal.classList.remove('is-closing');
+          reportPreviewContent.innerHTML = '';
+          pendingReportExport = null;
+        }, 230);
       }
 
       function showReportPreview(pc, details, exportJob) {
+        if (previewCloseTimer) clearTimeout(previewCloseTimer);
         reportPreviewContent.innerHTML = pc.innerHTML;
         const pages = reportPreviewContent.querySelectorAll('.print-page');
         reportPreviewPageCount.textContent = pages.length
@@ -3532,7 +3613,20 @@
         reportPreviewMeta.textContent = details;
         pendingReportExport = exportJob;
         previewViewport.scrollTop = 0;
-        reportPreviewModal.classList.remove('hidden');
+
+        // Satu entri history khusus agar Back pertama menutup preview,
+        // bukan meninggalkan webapp.
+        try {
+          history.pushState({ eCeklisOverlay: 'reportPreview' }, '', location.href);
+          previewHistoryOpen = true;
+        } catch (error) {
+          previewHistoryOpen = false;
+          console.warn('History preview tidak tersedia:', error);
+        }
+
+        reportPreviewModal.classList.remove('hidden', 'is-closing');
+        reportPreviewModal.classList.remove('is-visible');
+        requestAnimationFrame(() => reportPreviewModal.classList.add('is-visible'));
       }
 
       document.getElementById('closeReportPreviewBtn').addEventListener('click', closeReportPreview);
@@ -3623,11 +3717,10 @@
         navTargets.forEach(target => navObserver.observe(target));
       }
 
-      // Tombol Back Android/browser:
-      // 1) Jika halaman sedang di-scroll, kembali ke header paling atas.
-      // 2) Jika sudah berada di atas, Back berikutnya keluar dari webapp.
-      // Gunakan satu entri riwayat sementara agar Back pertama tidak langsung
-      // meninggalkan halaman ketika pengguna sedang membaca bagian bawah.
+      // Navigasi Back bertingkat:
+      // 1) Tutup overlay/preview yang sedang terbuka.
+      // 2) Jika sedang di bawah, kembali ke Dashboard dengan scroll halus.
+      // 3) Di Dashboard, tampilkan toast; Back kedua dalam 2 detik keluar.
       const backToTopState = { eCeklisBackGuard: true };
       try {
         history.pushState(backToTopState, '', location.href);
@@ -3635,18 +3728,39 @@
         console.warn('Riwayat navigasi tidak dapat disiapkan:', error);
       }
 
-      // Pola Back dua tahap seperti aplikasi sosial:
-      // - Saat masih di bawah: Back pertama kembali ke header.
-      // - Saat sudah di header: Back pertama menampilkan toast.
-      // - Back kedua dalam 2 detik dibiarkan keluar/navigasi normal.
       let lastBackPressAt = 0;
+      let backExitToastTimer = null;
+      const backExitToast = document.getElementById('backExitToast');
+
+      function showBackExitToast() {
+        if (!backExitToast) return;
+        backExitToast.classList.add('is-visible');
+        if (backExitToastTimer) clearTimeout(backExitToastTimer);
+        backExitToastTimer = setTimeout(() => {
+          backExitToast.classList.remove('is-visible');
+        }, 2100);
+      }
+
+      function hideBackExitToast() {
+        if (backExitToast) backExitToast.classList.remove('is-visible');
+        if (backExitToastTimer) clearTimeout(backExitToastTimer);
+        backExitToastTimer = null;
+      }
 
       window.addEventListener('popstate', () => {
-        const currentY = window.scrollY || document.documentElement.scrollTop || 0;
+        // Prioritas tertinggi: preview laporan. Back tidak boleh menutup webapp.
+        if (previewHistoryOpen || !reportPreviewModal.classList.contains('hidden')) {
+          closeReportPreview(true);
+          lastBackPressAt = 0;
+          hideBackExitToast();
+          return;
+        }
 
+        const currentY = window.scrollY || document.documentElement.scrollTop || 0;
         if (currentY > 8) {
           lastBackPressAt = 0;
-          window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+          hideBackExitToast();
+          window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
           try {
             history.pushState(backToTopState, '', location.href);
           } catch (error) {
@@ -3657,15 +3771,15 @@
 
         const now = Date.now();
         if (lastBackPressAt && (now - lastBackPressAt) <= 2000) {
-          // Jangan pasang guard lagi: biarkan navigasi Back berjalan.
+          // Back kedua: jangan pasang guard lagi, biarkan browser/WebView
+          // meneruskan navigasi keluar secara normal.
           lastBackPressAt = 0;
+          hideBackExitToast();
           return;
         }
 
         lastBackPressAt = now;
-        showToast('Tekan sekali lagi untuk keluar');
-
-        // Kembalikan guard setelah Back pertama agar halaman tetap terbuka.
+        showBackExitToast();
         try {
           history.pushState(backToTopState, '', location.href);
         } catch (error) {
@@ -3673,16 +3787,6 @@
         }
       });
 
-      // Navigasi bawah hanya menggulir halaman, tidak menambah entri hash
-      // sehingga tidak mengganggu urutan tombol Back.
-      document.querySelectorAll('.bottom-nav-link[data-nav-target]').forEach(link => {
-        link.addEventListener('click', event => {
-          const target = document.getElementById(link.dataset.navTarget);
-          if (!target) return;
-          event.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-      });
     });
   </script>
 </body>
