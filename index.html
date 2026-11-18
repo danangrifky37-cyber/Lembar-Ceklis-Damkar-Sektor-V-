@@ -3532,16 +3532,59 @@
         const svgUrl = URL.createObjectURL(svgBlob);
         const img = new Image();
         img.onload = () => {
-          const canvas = document.createElement('canvas'); canvas.width = 1200; canvas.height = 1200;
-          const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,1200,1200);
-          ctx.imageSmoothingEnabled = false; ctx.drawImage(img, 40, 40, 1120, 1120);
+          // Buat stiker JPG beridentitas: nama jenis kendaraan dan nomor polisi
+          // ikut tertanam pada gambar, bukan hanya tampil di modal aplikasi.
+          const cfg = UNITS_CONFIG[qrModalUnitId] || {};
+          const unitName = String(cfg.jenisKdo || qrModalUnitId).toUpperCase();
+          const plate = String(cfg.tnkb || '').toUpperCase();
+          const canvas = document.createElement('canvas');
+          canvas.width = 1200;
+          canvas.height = 1450;
+          const ctx = canvas.getContext('2d');
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // Bingkai dan identitas instansi
+          ctx.fillStyle = '#1e2188';
+          ctx.fillRect(0, 0, 1200, 250);
+          ctx.fillStyle = '#fff100';
+          ctx.fillRect(0, 244, 1200, 6);
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '700 34px Arial, sans-serif';
+          ctx.fillText('GULKARMAT SEKTOR 5 CEMPAKA PUTIH', 600, 65);
+          ctx.font = '800 54px Arial, sans-serif';
+          const fittedUnitFont = Math.min(54, 900 / Math.max(1, unitName.length) * 1.65);
+          ctx.font = `800 ${fittedUnitFont}px Arial, sans-serif`;
+          ctx.fillText(unitName, 600, 135, 1040);
+
+          // Nomor polisi ditampilkan dalam bidang kontras agar mudah dibaca.
+          const plateBoxWidth = Math.min(760, Math.max(300, plate.length * 43 + 100));
+          ctx.fillStyle = '#fff100';
+          ctx.beginPath();
+          ctx.roundRect((1200 - plateBoxWidth) / 2, 178, plateBoxWidth, 58, 14);
+          ctx.fill();
+          ctx.fillStyle = '#15185f';
+          ctx.font = '800 38px Arial, sans-serif';
+          ctx.fillText(plate || 'IDENTITAS UNIT', 600, 207, plateBoxWidth - 30);
+
+          // QR tetap tajam dan memiliki quiet zone putih yang cukup untuk dipindai.
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(img, 100, 285, 1000, 1000);
+
+          ctx.fillStyle = '#646987';
+          ctx.font = '600 24px Arial, sans-serif';
+          ctx.fillText('SCAN QR CODE UNTUK MEMBUKA DATA UNIT', 600, 1370);
+
           canvas.toBlob(jpgBlob => {
             URL.revokeObjectURL(svgUrl);
             if (!jpgBlob) { showToast('Gagal membuat JPG.'); return; }
             const jpgUrl = URL.createObjectURL(jpgBlob); const a = document.createElement('a');
             a.href = jpgUrl; a.download = `QR_Damkar_Sektor5_${qrModalUnitId}.jpg`;
             document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(jpgUrl), 1000);
-            showToast(`QR JPG ${qrModalUnitId} berhasil diunduh!`);
+            showToast(`QR JPG ${unitName}${plate ? ' - ' + plate : ''} berhasil diunduh!`);
           }, 'image/jpeg', 0.96);
         };
         img.onerror = () => { URL.revokeObjectURL(svgUrl); showToast('Gagal memproses QR JPG.'); };
