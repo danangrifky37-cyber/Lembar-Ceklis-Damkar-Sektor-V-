@@ -1035,861 +1035,227 @@
 
 </style>
 
-<style id="fireshift-square-cell-cadangan-fix">
-  /* Kotak tanggal tetap persegi; label cadangan dua baris agar nama grup utuh. */
-  #calendar-months .calendar-day-cell {
-    width: 100% !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    height: auto !important;
-    aspect-ratio: 1 / 1 !important;
-    border-radius: 9px !important;
-    padding: 3px !important;
-  }
-  #calendar-months .calendar-reserve-label {
-    position: absolute;
-    left: 1px;
-    right: 1px;
-    bottom: 3px;
-    z-index: 12;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1px;
-    padding: 3px 1px 2px;
-    border-radius: 5px;
-    background: rgba(8, 12, 35, .78);
-    color: #fff7a8;
-    text-align: center;
-    font-size: clamp(6.5px, 1.95vw, 8.5px);
-    line-height: 1.08;
-    font-weight: 800;
-    letter-spacing: -.02em;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-  #calendar-months .calendar-reserve-label strong {
-    display: block;
-    color: #ffffff;
-    font-size: clamp(7px, 2.15vw, 9.5px);
-    line-height: 1.08;
-    font-weight: 900;
-    white-space: nowrap;
-  }
-  @media (max-width: 360px) {
-    #calendar-months .calendar-day-cell { border-radius: 7px !important; }
-    #calendar-months .calendar-reserve-label { font-size: 6px; padding: 2px 0 1px; }
-    #calendar-months .calendar-reserve-label strong { font-size: 6.8px; }
-  }
-</style>
-<style id="fireshift-professional-redesign">
-  /* Tampilan profesional khusus halaman Jadwal Fireshift */
-  #calendar-screen {
-    background: radial-gradient(ellipse at 15% 0%, rgba(30,64,175,.30), transparent 42%),
-                linear-gradient(160deg, #0b1224 0%, #101a32 48%, #111827 100%) !important;
-  }
-  #calendar-screen > header {
-    min-height: 64px;
-    padding: 12px 14px !important;
-    background: linear-gradient(110deg, #7f1d1d 0%, #991b1b 48%, #172554 100%) !important;
-    border-bottom: 1px solid rgba(255,255,255,.16);
-    box-shadow: 0 8px 24px rgba(2,6,23,.28) !important;
-  }
-  #calendar-screen > header h2 {
-    color: #fff !important;
-    font-size: 16px !important;
-    letter-spacing: .045em !important;
-    text-shadow: 0 2px 8px rgba(0,0,0,.25);
-  }
-  #calendar-screen > header button {
-    border: 1px solid rgba(255,255,255,.18);
-    background: rgba(255,255,255,.12) !important;
-    border-radius: 12px !important;
-  }
-  #calendar-container { padding: 14px 12px 32px !important; }
-  #calendar-months { max-width: 520px; margin: 0 auto; }
-  #calendar-months .month-panel {
-    margin: 0 0 16px !important;
-    padding: 12px 10px 13px;
-    border: 1px solid rgba(148,163,184,.19);
-    border-radius: 19px;
-    background: linear-gradient(145deg, rgba(30,41,59,.94), rgba(15,23,42,.96));
-    box-shadow: 0 12px 28px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.045);
-  }
-  #calendar-months .month-title {
-    display: flex; align-items: center; justify-content: center;
-    min-height: 38px; margin: 0 0 8px;
-    color: #f8fafc; font-size: 15px; font-weight: 850;
-    letter-spacing: .075em; text-transform: uppercase;
-  }
-  #calendar-months .weekday-row {
-    margin-bottom: 7px; padding: 7px 0 8px;
-    border-top: 1px solid rgba(148,163,184,.13);
-    border-bottom: 1px solid rgba(148,163,184,.16);
-    color: #aab8ce; font-size: 10px; font-weight: 800;
-    letter-spacing: .06em; text-transform: uppercase;
-  }
-  #calendar-months .days-grid { gap: 5px !important; }
-  #calendar-months .calendar-day-cell {
-    border: 1px solid rgba(255,255,255,.20) !important;
-    border-radius: 11px !important;
-    box-shadow: 0 3px 8px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.16);
-    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
-  }
-  #calendar-months .calendar-day-cell:active { transform: scale(.94); }
-  #calendar-months .calendar-day-cell > span:first-child {
-    top: 6px !important; left: 7px !important;
-    font-size: 10px !important; font-weight: 800 !important;
-    text-shadow: 0 1px 3px rgba(0,0,0,.35);
-  }
-  #calendar-months .calendar-day-cell > span:nth-child(2) {
-    font-size: clamp(14px, 4vw, 18px) !important;
-    font-weight: 950 !important;
-    text-shadow: 0 2px 5px rgba(0,0,0,.28);
-  }
-  #calendar-months .calendar-reserve-label {
-    bottom: 4px !important; left: 3px !important; right: 3px !important;
-    padding: 3px 1px !important; border: 1px solid rgba(255,255,255,.22);
-    border-radius: 6px !important;
-    background: rgba(8,15,35,.84) !important;
-    color: #fde68a !important;
-    font-size: clamp(6px, 1.7vw, 8px) !important;
-    letter-spacing: .01em !important;
-  }
-  #calendar-months .calendar-reserve-label strong {
-    font-size: clamp(7px, 1.95vw, 9px) !important;
-    letter-spacing: .015em;
-  }
-  #calendar-months .calendar-day-cell:has(.calendar-reserve-label) > span:nth-child(2) {
-    top: 39% !important;
-  }
-  #calendar-months .calendar-day-cell[aria-label*="Cadangan"] { padding-bottom: 4px !important; }
-  #calendar-months .calendar-day-cell:focus-visible {
-    outline: 3px solid #facc15 !important; outline-offset: 2px;
-  }
-  @media (max-width: 360px) {
-    #calendar-container { padding-left: 8px !important; padding-right: 8px !important; }
-    #calendar-months .month-panel { padding-left: 7px; padding-right: 7px; }
-    #calendar-months .days-grid { gap: 3px !important; }
-  }
-</style>
-
-<style id="fireshift-square-larger-cells-final">
-  /* Ruang kalender sedikit lebih lebar agar setiap tanggal tetap persegi dan label cadangan tidak bertumpuk. */
-  #calendar-container {
-    overflow-x: auto !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-  }
-  #calendar-months {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 900px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-  #calendar-months .month-panel {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    padding:16px 14px 16px !important;
-  }
-  #calendar-months .days-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-    gap:8px !important;
-  }
-  #calendar-months .calendar-day-cell,
-  #calendar-months .days-grid > div {
-    width: 100% !important;
-    aspect-ratio: 1 / 1 !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    height: auto !important;
-    box-sizing: border-box !important;
-  }
-  #calendar-months .calendar-day-cell {
-    padding: 4px !important;
-    border-radius: 10px !important;
-  }
-  #calendar-months .calendar-reserve-label {
-    left: 3px !important;
-    right: 3px !important;
-    bottom: 4px !important;
-    min-height: 28px !important;
-    padding: 4px 2px 3px !important;
-    gap: 2px !important;
-    border-radius: 6px !important;
-    font-size: 8px !important;
-    line-height: 1.15 !important;
-    letter-spacing: 0 !important;
-    white-space: nowrap !important;
-  }
-  #calendar-months .calendar-reserve-label strong {
-    font-size: 9px !important;
-    line-height: 1.15 !important;
-    letter-spacing: 0 !important;
-  }
-  #calendar-months .calendar-day-cell:has(.calendar-reserve-label) > span:nth-child(2) {
-    top: 35% !important;
-    font-size: 16px !important;
-  }
-  #calendar-months .calendar-day-cell > span:first-child {
-    top: 6px !important;
-    left: 7px !important;
-    font-size: 11px !important;
-  }
-  @media (min-width: 520px) {
-    #calendar-months { min-width: 0 !important; }
-  }
-</style>
-
-
-<style id="fireshift-reserve-no-overlap">
-  /* Pisahkan huruf regu utama dari label cadangan pada setiap kotak tanggal. */
-  #calendar-months .calendar-day-cell[aria-label*="Cadangan"] > span:nth-child(2) {
-    top: 27% !important;
-    z-index: 2 !important;
-    font-size: 17px !important;
-    line-height: 1 !important;
-    text-shadow: 0 2px 5px rgba(0,0,0,.45) !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label {
-    top: auto !important;
-    bottom: 5px !important;
-    left: 4px !important;
-    right: 4px !important;
-    min-height: 31px !important;
-    padding: 4px 2px 3px !important;
-    gap: 2px !important;
-    z-index: 4 !important;
-    border: 1px solid rgba(255,255,255,.16) !important;
-    border-radius: 7px !important;
-    background: rgba(7, 15, 32, .94) !important;
-    box-shadow: 0 2px 6px rgba(0,0,0,.28) !important;
-    font-size: 8px !important;
-    line-height: 1.15 !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-    font-size: 9px !important;
-    line-height: 1.15 !important;
-  }
-  @media (max-width: 380px) {
-    #calendar-months .calendar-day-cell[aria-label*="Cadangan"] > span:nth-child(2) {
-      top: 25% !important;
-      font-size: 15px !important;
-    }
-    #calendar-months .calendar-day-cell .calendar-reserve-label {
-      left: 3px !important;
-      right: 3px !important;
-      min-height: 28px !important;
-      font-size: 7px !important;
-    }
-    #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-      font-size: 8px !important;
-    }
-  }
-</style>
-
-
-<style id="fireshift-final-shift-label-layout">
-  /* Tata ulang isi kotak: tanggal di kiri atas, regu di tengah atas, cadangan di bawah. */
-  #calendar-months .calendar-day-cell {
-    position: relative !important;
-    isolation: isolate !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-day-number {
-    top: 7px !important;
-    left: 8px !important;
-    z-index: 6 !important;
-    font-size: 12px !important;
-    line-height: 1 !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-shift-group {
-    position: absolute !important;
-    top: 43% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 3 !important;
-    display: block !important;
-    font-size: 23px !important;
-    line-height: 1 !important;
-    font-weight: 900 !important;
-    text-shadow: 0 2px 5px rgba(0,0,0,.38) !important;
-    pointer-events: none !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-shift-group-reserve {
-    top: 35% !important;
-    font-size: 19px !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label {
-    position: absolute !important;
-    top: auto !important;
-    left: 4px !important;
-    right: 4px !important;
-    bottom: 4px !important;
-    z-index: 5 !important;
-    min-height: 31px !important;
-    padding: 4px 2px 3px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 2px !important;
-    border: 1px solid rgba(255,255,255,.18) !important;
-    border-radius: 7px !important;
-    background: rgba(7,15,32,.96) !important;
-    box-shadow: 0 2px 7px rgba(0,0,0,.32) !important;
-    color: #fff2a6 !important;
-    font-size: 8px !important;
-    line-height: 1.1 !important;
-    letter-spacing: 0 !important;
-    white-space: nowrap !important;
-    pointer-events: none !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-    display: block !important;
-    color: #fff !important;
-    font-size: 9px !important;
-    line-height: 1.1 !important;
-    font-weight: 900 !important;
-  }
-  @media (max-width: 380px) {
-    #calendar-months .calendar-day-cell .calendar-shift-group-reserve {
-      top: 33% !important;
-      font-size: 17px !important;
-    }
-    #calendar-months .calendar-day-cell .calendar-reserve-label {
-      left: 3px !important;
-      right: 3px !important;
-      min-height: 28px !important;
-      padding: 3px 1px 2px !important;
-      font-size: 7px !important;
-    }
-    #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-      font-size: 8px !important;
-    }
-  }
-</style>
-
-
-<style id="fireshift-larger-square-cells-v2">
-  #calendar-container {
-    overflow-x: auto !important;
-    overflow-y: visible !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: thin;
-  }
-  #calendar-months {
-    width: 560px !important;
-    min-width: 560px !important;
-    max-width: 560px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-  #calendar-months .month-panel {
-    width: 100% !important;
-    padding: 16px 14px !important;
-    box-sizing: border-box !important;
-  }
-  #calendar-months .days-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-    gap: 8px !important;
-  }
-  #calendar-months .calendar-day-cell,
-  #calendar-months .days-grid > div {
-    width: 100% !important;
-    height: auto !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    aspect-ratio: 1 / 1 !important;
-    box-sizing: border-box !important;
-  }
-  #calendar-months .calendar-day-cell {
-    border-radius: 12px !important;
-    padding: 5px !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-day-number {
-    top: 9px !important;
-    left: 10px !important;
-    font-size: 13px !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-shift-group-reserve {
-    top: 34% !important;
-    font-size: 21px !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label {
-    left: 5px !important;
-    right: 5px !important;
-    bottom: 5px !important;
-    min-height: 36px !important;
-    padding: 5px 3px 4px !important;
-    gap: 3px !important;
-    border-radius: 8px !important;
-    font-size: 9px !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-    font-size: 11px !important;
-  }
-  @media (max-width: 600px) {
-    #calendar-months {
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-    }
-  }
-</style>
-
-
-<style id="fireshift-fit-one-screen">
-  /* Semua tujuh hari tampil dalam lebar layar tanpa scroll horizontal. */
-  #calendar-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-    overflow-y: visible !important;
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-    box-sizing: border-box !important;
-  }
-  #calendar-months {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    box-sizing: border-box !important;
-  }
-  #calendar-months .month-panel {
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 13px 8px 14px !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-  }
-  #calendar-months .days-grid {
-    width: 100% !important;
-    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-    gap: 4px !important;
-  }
-  #calendar-months .calendar-day-cell,
-  #calendar-months .days-grid > div {
-    width: 100% !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    height: auto !important;
-    aspect-ratio: 1 / 1 !important;
-    box-sizing: border-box !important;
-  }
-  #calendar-months .calendar-day-cell {
-    padding: 3px !important;
-    border-radius: 8px !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-day-number {
-    top: 5px !important;
-    left: 6px !important;
-    font-size: 10px !important;
-    line-height: 1 !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-shift-group {
-    top: 50% !important;
-    font-size: 18px !important;
-    line-height: 1 !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-shift-group-reserve {
-    top: 31% !important;
-    font-size: 14px !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label {
-    left: 2px !important;
-    right: 2px !important;
-    bottom: 3px !important;
-    min-height: 23px !important;
-    padding: 3px 1px 2px !important;
-    gap: 1px !important;
-    border-radius: 5px !important;
-    font-size: clamp(5.5px, 1.65vw, 7px) !important;
-    line-height: 1.05 !important;
-    letter-spacing: 0 !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-    font-size: clamp(6px, 1.85vw, 7.5px) !important;
-    line-height: 1.05 !important;
-  }
-  @media (min-width: 500px) {
-    #calendar-container { padding-left: 14px !important; padding-right: 14px !important; }
-    #calendar-months .month-panel { padding-left: 12px !important; padding-right: 12px !important; }
-    #calendar-months .days-grid { gap: 6px !important; }
-    #calendar-months .calendar-day-cell .calendar-shift-group-reserve { top: 32% !important; font-size: 17px !important; }
-    #calendar-months .calendar-day-cell .calendar-reserve-label { font-size: 8px !important; min-height: 28px !important; }
-    #calendar-months .calendar-day-cell .calendar-reserve-label strong { font-size: 9px !important; }
-  }
-</style>
-
-
-<style id="fireshift-type-hierarchy-adjustment">
-  /* Hierarki teks: tanggal paling menonjol, huruf regu lebih kecil, label cadangan ringkas. */
-  #calendar-months .calendar-day-cell .calendar-day-number {
-    top: 5px !important;
-    left: 6px !important;
-    font-size: 13px !important;
-    font-weight: 900 !important;
-    line-height: 1 !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-shift-group {
-    font-size: 14px !important;
-    font-weight: 850 !important;
-    line-height: 1 !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-shift-group-reserve {
-    top: 33% !important;
-    font-size: 12px !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label {
-    left: 2px !important;
-    right: 2px !important;
-    bottom: 3px !important;
-    min-height: 20px !important;
-    padding: 2px 1px 2px !important;
-    gap: 1px !important;
-    font-size: 5.8px !important;
-    line-height: 1.05 !important;
-    letter-spacing: 0 !important;
-    border-radius: 4px !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-    font-size: 6.5px !important;
-    line-height: 1.05 !important;
-    font-weight: 850 !important;
-  }
-  @media (min-width: 500px) {
-    #calendar-months .calendar-day-cell .calendar-day-number {
-      font-size: 15px !important;
-    }
-    #calendar-months .calendar-day-cell .calendar-shift-group {
-      font-size: 17px !important;
-    }
-    #calendar-months .calendar-day-cell .calendar-shift-group-reserve {
-      font-size: 15px !important;
-    }
-    #calendar-months .calendar-day-cell .calendar-reserve-label {
-      min-height: 24px !important;
-      font-size: 7px !important;
-    }
-    #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-      font-size: 8px !important;
-    }
-  }
-</style>
-
-
-<style id="fireshift-zero-overlap-layout">
-  /* Setiap elemen mendapat zona sendiri: tanggal di atas, regu di bawahnya. */
-  #calendar-months .calendar-day-cell {
-    position: relative !important;
-    isolation: isolate !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-day-number {
-    position: absolute !important;
-    top: 5px !important;
-    left: 6px !important;
-    right: auto !important;
-    z-index: 8 !important;
-    display: block !important;
-    font-size: 14px !important;
-    line-height: 1 !important;
-    font-weight: 900 !important;
-  }
-  /* Hari biasa: huruf regu ditempatkan di bagian bawah-tengah, jauh dari tanggal. */
-  #calendar-months .calendar-day-cell .calendar-shift-group {
-    position: absolute !important;
-    top: 68% !important;
-    left: 50% !important;
-    right: auto !important;
-    bottom: auto !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 3 !important;
-    display: block !important;
-    font-size: 16px !important;
-    line-height: 1 !important;
-    font-weight: 900 !important;
-    text-shadow: 0 2px 4px rgba(0,0,0,.35) !important;
-    white-space: nowrap !important;
-    pointer-events: none !important;
-  }
-  /* Hari dengan cadangan: huruf regu utama di zona tengah, label cadangan di bawah. */
-  #calendar-months .calendar-day-cell .calendar-shift-group-reserve {
-    top: 43% !important;
-    font-size: 13px !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label {
-    position: absolute !important;
-    top: auto !important;
-    left: 3px !important;
-    right: 3px !important;
-    bottom: 3px !important;
-    z-index: 5 !important;
-    min-height: 21px !important;
-    padding: 2px 1px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 1px !important;
-    border: 1px solid rgba(255,255,255,.16) !important;
-    border-radius: 5px !important;
-    background: rgba(7,15,32,.97) !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,.3) !important;
-    color: #fff2a6 !important;
-    font-size: 6px !important;
-    line-height: 1.05 !important;
-    letter-spacing: 0 !important;
-    white-space: nowrap !important;
-    pointer-events: none !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-    display: block !important;
-    color: #fff !important;
-    font-size: 7px !important;
-    line-height: 1.05 !important;
-    font-weight: 900 !important;
-  }
-  @media (min-width: 500px) {
-    #calendar-months .calendar-day-cell .calendar-day-number { font-size: 15px !important; }
-    #calendar-months .calendar-day-cell .calendar-shift-group { font-size: 18px !important; }
-    #calendar-months .calendar-day-cell .calendar-shift-group-reserve { font-size: 15px !important; }
-    #calendar-months .calendar-day-cell .calendar-reserve-label { min-height: 25px !important; font-size: 7px !important; }
-    #calendar-months .calendar-day-cell .calendar-reserve-label strong { font-size: 8px !important; }
-  }
-</style>
-
-
-<style id="fireshift-inline-position-final">
-  /* Label cadangan berada di jalur bawah yang terpisah dari tanggal dan huruf regu. */
-  #calendar-months .calendar-day-cell .calendar-reserve-label {
-    position: absolute !important;
-    top: auto !important;
-    left: 3px !important;
-    right: 3px !important;
-    bottom: 3px !important;
-    z-index: 6 !important;
-    min-height: 21px !important;
-    padding: 2px 1px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 1px !important;
-    border: 1px solid rgba(255,255,255,.18) !important;
-    border-radius: 5px !important;
-    background: rgba(7,15,32,.97) !important;
-    color: #fff2a6 !important;
-    font-size: 6px !important;
-    line-height: 1.05 !important;
-    white-space: nowrap !important;
-    pointer-events: none !important;
-  }
-  #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-    display: block !important;
-    color: #fff !important;
-    font-size: 7px !important;
-    line-height: 1.05 !important;
-    font-weight: 900 !important;
-  }
-  @media (min-width: 500px) {
-    #calendar-months .calendar-day-cell .calendar-reserve-label {
-      min-height: 25px !important;
-      font-size: 7px !important;
-    }
-    #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-      font-size: 8px !important;
-    }
-  }
-</style>
-
-<style id="fireshift-reference-layout-final">
-  #calendar-toolbar { flex: 0 0 auto; }
-  #calendar-container { overflow-x: hidden !important; padding: 14px 12px 30px !important; }
-  #calendar-months { width: 100% !important; min-width: 0 !important; max-width: 720px !important; margin: 0 auto !important; }
-  #calendar-months .month-panel { width: 100% !important; min-width: 0 !important; padding: 14px 10px !important; margin-bottom: 16px !important; }
-  #calendar-months .days-grid { grid-template-columns: repeat(7,minmax(0,1fr)) !important; gap: 5px !important; }
-  #calendar-months .days-grid > div, #calendar-months .calendar-day-cell { min-width: 0 !important; width: 100% !important; aspect-ratio: 1 / 1 !important; }
-  #calendar-months .calendar-day-cell { border-radius: 10px !important; }
-  #calendar-months .weekday-row { grid-template-columns: repeat(7,minmax(0,1fr)) !important; }
-  @media (max-width:380px) {
-    #calendar-toolbar { gap: 5px !important; padding-left: 8px !important; padding-right: 8px !important; }
-    #calendar-toolbar button { padding-left: 5px !important; padding-right: 5px !important; font-size: 10px !important; }
-    #calendar-toolbar select { padding-left: 4px !important; padding-right: 20px !important; font-size: 12px !important; }
-    #calendar-container { padding-left: 8px !important; padding-right: 8px !important; }
-    #calendar-months .month-panel { padding-left: 7px !important; padding-right: 7px !important; }
-    #calendar-months .days-grid { gap: 4px !important; }
-    #calendar-months .calendar-day-cell { border-radius: 8px !important; }
-  }
-</style>
-
-<style id="fireshift-reference-layout-final">
+<style id="fireshift-calendar-clean-layout">
+  /* Tampilan profesional dan bebas tumpuk khusus halaman Jadwal Fireshift */
   #calendar-screen {
     background:
       radial-gradient(ellipse at 12% 0%, rgba(30,64,175,.25), transparent 42%),
       linear-gradient(160deg, #0b1224 0%, #101a32 52%, #111827 100%) !important;
   }
   #calendar-screen > header {
-    min-height: 108px !important;
-    padding: 18px 22px !important;
+    min-height: 64px !important;
+    padding: 12px 14px !important;
     background: linear-gradient(110deg, #8b1e1e 0%, #991f24 52%, #20234f 100%) !important;
+    border-bottom: 1px solid rgba(255,255,255,.16);
+    box-shadow: 0 8px 24px rgba(2,6,23,.28) !important;
   }
   #calendar-screen > header button {
-    min-height: 54px;
-    padding: 0 16px !important;
-    border-radius: 20px !important;
-    font-size: 14px !important;
+    min-height: 44px;
+    padding: 0 12px !important;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.12) !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
   }
   #calendar-screen > header h2 {
-    font-size: 22px !important;
-    letter-spacing: .01em !important;
+    color: #fff !important;
+    font-size: 17px !important;
+    letter-spacing: .02em !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,.25);
   }
   #calendar-toolbar {
-    min-height: 88px;
-    padding: 14px 22px !important;
-    gap: 12px !important;
+    flex: 0 0 auto;
+    min-height: 68px;
+    padding: 10px 12px !important;
+    gap: 8px !important;
     background: rgba(17,27,49,.97) !important;
   }
   #calendar-toolbar button {
-    min-height: 56px !important;
-    border-radius: 21px !important;
-    font-size: 16px !important;
+    min-height: 46px !important;
+    padding: 0 8px !important;
+    border-radius: 15px !important;
+    font-size: 12px !important;
   }
   #calendar-toolbar select {
-    min-height: 58px !important;
-    border-radius: 22px !important;
-    font-size: 19px !important;
+    min-height: 48px !important;
+    border-radius: 16px !important;
+    font-size: 15px !important;
   }
   #calendar-container {
-    padding: 14px 18px 34px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px 10px 28px !important;
     overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
   }
   #calendar-months {
     width: 100% !important;
     min-width: 0 !important;
-    max-width: 900px !important;
+    max-width: 720px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
   }
   #calendar-months .month-panel {
-    padding: 18px 14px 20px !important;
-    margin-bottom: 24px !important;
-    border-radius: 32px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 14px 10px 15px !important;
+    margin-bottom: 18px !important;
+    border: 1px solid rgba(148,163,184,.19);
+    border-radius: 22px !important;
+    background: linear-gradient(145deg, rgba(30,41,59,.94), rgba(15,23,42,.96));
+    box-shadow: 0 12px 28px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.045);
+    box-sizing: border-box !important;
   }
   #calendar-months .month-title {
-    min-height: 58px !important;
-    margin-bottom: 12px !important;
-    font-size: 21px !important;
-    letter-spacing: .08em !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px !important;
+    margin: 0 0 8px !important;
+    color: #f8fafc;
+    font-size: 16px !important;
+    font-weight: 850;
+    letter-spacing: .07em !important;
+    text-transform: uppercase;
   }
   #calendar-months .weekday-row {
-    padding: 12px 0 13px !important;
-    margin-bottom: 10px !important;
-    font-size: 14px !important;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    padding: 8px 0 !important;
+    margin-bottom: 8px !important;
+    border-top: 1px solid rgba(148,163,184,.13);
+    border-bottom: 1px solid rgba(148,163,184,.16);
+    color: #aab8ce;
+    font-size: 11px !important;
+    font-weight: 800;
+    letter-spacing: .05em;
+    text-transform: uppercase;
   }
   #calendar-months .days-grid {
-    gap: 7px !important;
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    width: 100% !important;
   }
-  #calendar-months .calendar-day-cell,
-  #calendar-months .days-grid > div {
-    aspect-ratio: 1 / 1 !important;
+  #calendar-months .calendar-day-empty {
+    width: 100% !important;
+    min-width: 0 !important;
+    aspect-ratio: 1 / 1.12 !important;
   }
+  /* Tata letak fleksibel 2 baris di dalam sel agar tanggal, regu piket, dan cadangan tidak pernah menumpuk */
   #calendar-months .calendar-day-cell {
-    border-radius: 14px !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 52px !important;
+    aspect-ratio: 1 / 1.12 !important;
+    padding: 4px !important;
+    border: 1px solid rgba(255,255,255,.22) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 3px 8px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.16);
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    transition: transform .18s ease, box-shadow .18s ease;
   }
-  #calendar-months .calendar-day-cell > span:first-child {
-    top: 9px !important;
-    left: 10px !important;
-    font-size: 18px !important;
+  #calendar-months .calendar-day-cell:active {
+    transform: scale(.95);
   }
-  #calendar-months .calendar-day-cell > span:nth-child(2) {
-    font-size: 23px !important;
+  #calendar-months .calendar-day-cell:focus-visible {
+    outline: 3px solid #facc15 !important;
+    outline-offset: 2px;
   }
-  #calendar-months .calendar-day-cell[aria-label*="Cadangan"] > span:nth-child(2) {
-    top: 31% !important;
-    font-size: 18px !important;
+  #calendar-months .calendar-cell-top {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 2px !important;
+    width: 100% !important;
+    flex-shrink: 0 !important;
   }
-  #calendar-months .calendar-day-cell .calendar-reserve-label {
-    left: 5px !important;
-    right: 5px !important;
-    bottom: 6px !important;
-    min-height: 38px !important;
-    padding: 5px 2px 4px !important;
-    border-radius: 9px !important;
-    font-size: 11px !important;
-    line-height: 1.05 !important;
+  #calendar-months .calendar-day-number {
+    position: static !important;
+    display: inline-block !important;
+    color: #ffffff !important;
+    font-size: clamp(11px, 3.1vw, 15px) !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,.4) !important;
   }
-  #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-    font-size: 11px !important;
-    line-height: 1.05 !important;
+  #calendar-months .calendar-shift-group {
+    position: static !important;
+    transform: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 2px 4px !important;
+    border-radius: 5px !important;
+    background: rgba(0, 0, 0, .30) !important;
+    border: 1px solid rgba(255, 255, 255, .24) !important;
+    color: #ffffff !important;
+    font-size: clamp(9.5px, 2.7vw, 13px) !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,.35) !important;
   }
-  @media (max-width: 520px) {
-    #calendar-screen > header {
-      min-height: 76px !important;
-      padding: 10px 12px !important;
-    }
-    #calendar-screen > header button {
-      min-height: 44px;
-      padding: 0 10px !important;
-      font-size: 12px !important;
-    }
-    #calendar-screen > header h2 { font-size: 16px !important; }
-    #calendar-toolbar {
-      min-height: 72px;
-      padding: 9px 10px !important;
-      gap: 6px !important;
-    }
-    #calendar-toolbar button {
-      min-height: 46px !important;
-      padding: 0 6px !important;
-      border-radius: 15px !important;
-      font-size: 11px !important;
-    }
-    #calendar-toolbar select {
-      min-height: 48px !important;
-      padding-left: 5px !important;
-      font-size: 14px !important;
-    }
-    #calendar-container { padding: 10px 9px 26px !important; }
-    #calendar-months .month-panel {
-      padding: 11px 7px 13px !important;
-      margin-bottom: 15px !important;
-      border-radius: 20px !important;
-    }
-    #calendar-months .month-title {
-      min-height: 42px !important;
-      font-size: 15px !important;
-    }
-    #calendar-months .weekday-row {
-      padding: 8px 0 !important;
-      font-size: 10px !important;
-    }
-    #calendar-months .days-grid { gap: 4px !important; }
-    #calendar-months .calendar-day-cell { border-radius: 9px !important; }
-    #calendar-months .calendar-day-cell > span:first-child {
-      top: 6px !important;
-      left: 6px !important;
-      font-size: 12px !important;
-    }
-    #calendar-months .calendar-day-cell > span:nth-child(2) {
-      font-size: 16px !important;
-    }
-    #calendar-months .calendar-day-cell[aria-label*="Cadangan"] > span:nth-child(2) {
-      top: 29% !important;
-      font-size: 13px !important;
-    }
-    #calendar-months .calendar-day-cell .calendar-reserve-label {
-      left: 2px !important;
-      right: 2px !important;
-      bottom: 3px !important;
-      min-height: 25px !important;
-      padding: 3px 0 2px !important;
-      border-radius: 5px !important;
-      font-size: clamp(6px, 1.75vw, 8px) !important;
-    }
-    #calendar-months .calendar-day-cell .calendar-reserve-label strong {
-      font-size: clamp(6.5px, 1.9vw, 8.5px) !important;
-    }
+  #calendar-months .calendar-reserve-label {
+    position: static !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1px !important;
+    width: 100% !important;
+    margin-top: auto !important;
+    padding: 2.5px 1px 2px !important;
+    border: 1px solid rgba(255,255,255,.18) !important;
+    border-radius: 5px !important;
+    background: rgba(7, 15, 32, .92) !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,.28) !important;
+    color: #fff2a6 !important;
+    text-align: center !important;
+    font-size: clamp(5.8px, 1.65vw, 8.5px) !important;
+    font-weight: 800 !important;
+    line-height: 1.06 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+    pointer-events: none !important;
+    box-sizing: border-box !important;
+  }
+  #calendar-months .calendar-reserve-label strong {
+    display: block !important;
+    color: #ffffff !important;
+    font-size: clamp(6.5px, 1.85vw, 9.5px) !important;
+    font-weight: 900 !important;
+    line-height: 1.06 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+  }
+  @media (min-width: 520px) {
+    #calendar-months .days-grid { gap: 7px !important; }
+    #calendar-months .calendar-day-empty,
+    #calendar-months .calendar-day-cell { aspect-ratio: 1 / 1 !important; }
+    #calendar-months .calendar-day-cell { padding: 7px !important; border-radius: 13px !important; }
+    #calendar-months .calendar-shift-group { padding: 3px 6px !important; border-radius: 6px !important; }
+    #calendar-months .calendar-reserve-label { padding: 4px 2px 3px !important; border-radius: 7px !important; }
+  }
+  @media (max-width: 380px) {
+    #calendar-toolbar { gap: 5px !important; padding-left: 8px !important; padding-right: 8px !important; }
+    #calendar-toolbar button { padding-left: 5px !important; padding-right: 5px !important; font-size: 10px !important; }
+    #calendar-toolbar select { padding-left: 4px !important; padding-right: 20px !important; font-size: 12px !important; }
+    #calendar-container { padding-left: 7px !important; padding-right: 7px !important; }
+    #calendar-months .month-panel { padding-left: 6px !important; padding-right: 6px !important; border-radius: 16px !important; }
+    #calendar-months .days-grid { gap: 3px !important; }
+    #calendar-months .calendar-day-cell { padding: 3px !important; border-radius: 8px !important; min-height: 48px !important; }
+    #calendar-months .calendar-day-number { font-size: 10.5px !important; }
+    #calendar-months .calendar-shift-group { font-size: 9px !important; padding: 1.5px 3px !important; }
+    #calendar-months .calendar-reserve-label { padding: 2px 0 1.5px !important; font-size: 5.5px !important; }
+    #calendar-months .calendar-reserve-label strong { font-size: 6.2px !important; }
   }
 </style>
 
@@ -1990,13 +1356,13 @@
       </header>
 
       <div id="calendar-toolbar" class="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_minmax(0,2.3fr)_minmax(0,1fr)] items-center gap-2 border-b border-white/10 bg-[#111b31]/95 px-3 py-3 backdrop-blur-md">
-        <button type="button" id="calendarPrevYear" onclick="changeCalendarYear(-1)" class="min-h-[46px] rounded-2xl border border-slate-600/50 bg-slate-800/70 px-2 text-xs font-bold text-slate-300 active:scale-95">◀ <span id="calendarPrevYearLabel">2025</span></button>
+        <button type="button" id="calendarPrevMonth" onclick="changeCalendarMonth(-1)" class="min-h-[46px] rounded-2xl border border-slate-500/60 bg-slate-800/70 px-2 text-xs font-bold text-yellow-300 active:scale-95">◀ <span id="calendarPrevMonthLabel">Okt</span></button>
         <label class="relative block">
-          <span class="sr-only">Pilih tahun kalender</span>
-          <select id="calendarYearSelect" onchange="setCalendarYear(this.value)" class="min-h-[50px] w-full appearance-none rounded-2xl border border-yellow-300/60 bg-slate-800 px-3 text-center text-sm font-extrabold text-yellow-300 outline-none focus:ring-2 focus:ring-yellow-300/40"></select>
+          <span class="sr-only">Pilih bulan kalender</span>
+          <select id="calendarMonthSelect" onchange="setCalendarMonth(this.value)" class="min-h-[50px] w-full appearance-none rounded-2xl border border-yellow-300/60 bg-slate-800 px-3 text-center text-sm font-extrabold text-yellow-300 outline-none focus:ring-2 focus:ring-yellow-300/40"></select>
           <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-yellow-300">⌄</span>
         </label>
-        <button type="button" id="calendarNextYear" onclick="changeCalendarYear(1)" class="min-h-[46px] rounded-2xl border border-slate-500/60 bg-slate-800/70 px-2 text-xs font-bold text-yellow-300 active:scale-95"><span id="calendarNextYearLabel">2027</span> ▶</button>
+        <button type="button" id="calendarNextMonth" onclick="changeCalendarMonth(1)" class="min-h-[46px] rounded-2xl border border-slate-500/60 bg-slate-800/70 px-2 text-xs font-bold text-yellow-300 active:scale-95"><span id="calendarNextMonthLabel">Des</span> ▶</button>
       </div>
 
       <main class="flex-1 overflow-y-auto no-scrollbar pb-12 px-3" id="calendar-container">
@@ -2583,6 +1949,8 @@
     /* ----- FIRESHIFT CALENDAR + LAPORAN HARIAN REALTIME ----- */
     // Anchor: 15 November 2026 is Group A
     const ANCHOR_DATE = new Date(Date.UTC(2026, 10, 15));
+    // Anchor Cadangan: 17 November 2026 = Group A, 18 November 2026 = Group B, 19 November 2026 = Group C (berulang setiap 3 hari)
+    const RESERVE_ANCHOR_DATE = new Date(Date.UTC(2026, 10, 17));
     const MONTH_NAMES = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     let selectedCalendarDate = null;
     let calendarReportUnsubscribe = null;
@@ -2597,12 +1965,14 @@
       return `${v.year}-${v.month}-${v.day}`;
     }
     function getReserveInfo(year, month, day) {
-      // Cadangan hanya ditampilkan pada Selasa, Rabu, dan Kamis.
-      const date = new Date(Date.UTC(year, month, day));
-      const weekday = date.getUTCDay(); // Minggu=0, Selasa=2, Rabu=3, Kamis=4
+      // Cadangan hanya masuk pada hari Selasa (2), Rabu (3), dan Kamis (4),
+      // dengan perhitungan urutan tetap mengikuti siklus 3 hari sejak 17 November 2026 (Group A).
+      const targetDate = new Date(Date.UTC(year, month, day));
+      const weekday = targetDate.getUTCDay(); // Minggu=0, Senin=1, Selasa=2, Rabu=3, Kamis=4
       if (![2, 3, 4].includes(weekday)) return null;
-      // Pola tetap setiap pekan: Selasa=A, Rabu=B, Kamis=C.
-      return ({2:'A', 3:'B', 4:'C'})[weekday];
+      const diffDays = Math.round((targetDate - RESERVE_ANCHOR_DATE) / 86400000);
+      const reserveIndex = ((diffDays % 3) + 3) % 3;
+      return ['A', 'B', 'C'][reserveIndex];
     }
     function getShiftInfo(year, month, day) {
       const targetDate = new Date(Date.UTC(year, month, day));
@@ -2621,59 +1991,92 @@
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const todayISO = calendarTodayISO();
       let html = `<section class="month-panel"><div class="month-title">${MONTH_NAMES[month]} ${year}</div><div class="weekday-row grid grid-cols-7 text-center"><div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div></div><div class="days-grid grid grid-cols-7">`;
-      for (let i=0;i<firstDay;i++) html += `<div class="w-full aspect-square"></div>`;
+      for (let i=0;i<firstDay;i++) html += `<div class="calendar-day-empty w-full"></div>`;
       for (let day=1;day<=daysInMonth;day++) {
         const shift = getShiftInfo(year,month,day);
         const iso = calendarISO(year,month,day);
         const isToday = iso === todayISO;
         const isSelected = iso === (selectedCalendarDate || todayISO);
         const glow = isToday ? 'ring-[3px] ring-cyan-200 shadow-[0_0_8px_#67e8f9,0_0_18px_#22d3ee,0_0_30px_rgba(34,211,238,.65)] z-10 scale-[.96]' : '';
-        const selected = isSelected ? 'outline outline-2 outline-yellow-200 outline-offset-[-4px]' : '';
+        const selected = isSelected ? 'outline outline-2 outline-yellow-200 outline-offset-[-3px]' : '';
         const reserveGroup = getReserveInfo(year,month,day);
         const reserveBadge = reserveGroup
-          ? `<span class="calendar-reserve-label" aria-hidden="true"><span>Cadangan</span><strong>Group ${reserveGroup}</strong></span>`
+          ? `<div class="calendar-reserve-label" aria-hidden="true"><span>Cadangan</span><strong>Group ${reserveGroup}</strong></div>`
           : '';
         const reserveLabel = reserveGroup ? `, Cadangan Group ${reserveGroup}` : '';
-        const shiftClass = reserveGroup ? 'calendar-shift-group calendar-shift-group-reserve' : 'calendar-shift-group';
-        html += `<button type="button" data-calendar-date="${iso}" onclick="selectCalendarDate('${iso}')" aria-label="${day} ${MONTH_NAMES[month]} ${year}, Regu ${shift.group}${reserveLabel}" title="${calendarDateLabel(iso)} — Regu ${shift.group}${reserveLabel}" class="${shift.bg} calendar-day-cell w-full aspect-square relative rounded-lg p-1 text-left overflow-hidden ${glow} ${selected} active:scale-95 transition-transform" style="position:relative;isolation:isolate;"><span class="text-white font-black" style="position:absolute;top:6px;left:7px;z-index:8;font-size:14px;line-height:1;">${day}</span><span class="text-white font-extrabold" style="position:absolute;top:${reserveGroup ? '42%' : '58%'};left:50%;transform:translate(-50%,-50%);z-index:3;display:block;font-size:${reserveGroup ? '13px' : '18px'};line-height:1;font-weight:900;text-shadow:0 2px 4px rgba(0,0,0,.4);white-space:nowrap;pointer-events:none;">${shift.group}</span>${reserveBadge}${isToday ? '<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-cyan-100 shadow-[0_0_8px_#a5f3fc]"></span>' : ''}</button>`;
+        html += `<button type="button" data-calendar-date="${iso}" onclick="selectCalendarDate('${iso}')" aria-label="${day} ${MONTH_NAMES[month]} ${year}, Regu ${shift.group}${reserveLabel}" title="${calendarDateLabel(iso)} — Regu ${shift.group}${reserveLabel}" class="${shift.bg} calendar-day-cell w-full relative rounded-lg text-left overflow-hidden ${glow} ${selected} active:scale-95 transition-transform"><div class="calendar-cell-top"><span class="calendar-day-number">${day}</span><span class="calendar-shift-group">${shift.group}</span></div>${reserveBadge}</button>`;
       }
       const remainder = (firstDay + daysInMonth) % 7;
-      if (remainder) for (let i=0;i<7-remainder;i++) html += `<div class="w-full aspect-square"></div>`;
+      if (remainder) for (let i=0;i<7-remainder;i++) html += `<div class="calendar-day-empty w-full"></div>`;
       return html + `</div></section>`;
     }
-    // Kalender mengikuti tahun yang dipilih. Pada tahun berjalan, tampilkan mulai bulan ini.
+    // Kalender menampilkan bulan yang dipilih dan memungkinkan perpindahan antarbulan.
+    const SHORT_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     let selectedCalendarYear = Number(calendarTodayISO().slice(0,4));
-    function syncCalendarYearControls() {
-      const select = document.getElementById('calendarYearSelect');
-      const prev = document.getElementById('calendarPrevYear');
-      const next = document.getElementById('calendarNextYear');
-      const prevLabel = document.getElementById('calendarPrevYearLabel');
-      const nextLabel = document.getElementById('calendarNextYearLabel');
+    let selectedCalendarMonth = Number(calendarTodayISO().slice(5,7)) - 1;
+    function syncCalendarMonthControls() {
+      const select = document.getElementById('calendarMonthSelect');
+      const prev = document.getElementById('calendarPrevMonth');
+      const next = document.getElementById('calendarNextMonth');
+      const prevLabel = document.getElementById('calendarPrevMonthLabel');
+      const nextLabel = document.getElementById('calendarNextMonthLabel');
+      const currentYear = Number(calendarTodayISO().slice(0,4));
+      const minYear = 2026;
+      const maxYear = Math.max(2035, currentYear + 5);
       if (select) {
-        const currentYear = Number(calendarTodayISO().slice(0,4));
-        const minYear = 2026;
-        const maxYear = Math.max(2035, currentYear + 5);
-        select.innerHTML = Array.from({length:maxYear-minYear+1},(_,i)=>minYear+i).map(y=>`<option value="${y}">Tahun ${y}</option>`).join('');
-        select.value = String(selectedCalendarYear);
+        const opts = [];
+        for (let y = minYear; y <= maxYear; y++) {
+          for (let m = 0; m < 12; m++) {
+            const val = `${y}-${String(m + 1).padStart(2, '0')}`;
+            opts.push(`<option value="${val}">${MONTH_NAMES[m]} ${y}</option>`);
+          }
+        }
+        select.innerHTML = opts.join('');
+        select.value = `${selectedCalendarYear}-${String(selectedCalendarMonth + 1).padStart(2, '0')}`;
       }
-      if (prevLabel) prevLabel.textContent = selectedCalendarYear <= 2026 ? 2026 : selectedCalendarYear - 1;
-      if (nextLabel) nextLabel.textContent = selectedCalendarYear + 1;
-      if (prev) { prev.disabled = selectedCalendarYear <= 2026; prev.classList.toggle('opacity-40',prev.disabled); }
-      if (next) { next.disabled = selectedCalendarYear >= 2100; next.classList.toggle('opacity-40',next.disabled); }
+      const prevDate = new Date(Date.UTC(selectedCalendarYear, selectedCalendarMonth - 1, 1));
+      const nextDate = new Date(Date.UTC(selectedCalendarYear, selectedCalendarMonth + 1, 1));
+      const isAtMin = selectedCalendarYear <= minYear && selectedCalendarMonth === 0;
+      const isAtMax = selectedCalendarYear >= maxYear && selectedCalendarMonth === 11;
+      if (prevLabel) prevLabel.textContent = SHORT_MONTH_NAMES[prevDate.getUTCMonth()];
+      if (nextLabel) nextLabel.textContent = SHORT_MONTH_NAMES[nextDate.getUTCMonth()];
+      if (prev) { prev.disabled = isAtMin; prev.classList.toggle('opacity-40', prev.disabled); }
+      if (next) { next.disabled = isAtMax; next.classList.toggle('opacity-40', next.disabled); }
     }
     function renderCalendarMonths() {
       const container = document.getElementById('calendar-months');
       if (!container) return;
-      const today = calendarTodayISO();
-      const currentYear = Number(today.slice(0,4));
-      let year = selectedCalendarYear;
-      let month = year === currentYear ? Number(today.slice(5,7)) - 1 : 0;
-      let html = '';
-      for (; month < 12; month++) {
-        html += buildMonthBlock(year,month);
+      container.innerHTML = buildMonthBlock(selectedCalendarYear, selectedCalendarMonth);
+      syncCalendarMonthControls();
+    }
+    function setCalendarMonth(value) {
+      if (typeof value === 'string' && value.includes('-')) {
+        const [y, m] = value.split('-').map(Number);
+        if (!Number.isInteger(y) || !Number.isInteger(m) || m < 1 || m > 12) return;
+        selectedCalendarYear = y;
+        selectedCalendarMonth = m - 1;
+      } else {
+        const m = Number(value);
+        if (!Number.isInteger(m) || m < 0 || m > 11) return;
+        selectedCalendarMonth = m;
       }
-      container.innerHTML = html;
-      syncCalendarYearControls();
+      selectedCalendarDate = null;
+      renderCalendarMonths();
+      const scroller = document.getElementById('calendar-container');
+      if (scroller) scroller.scrollTop = 0;
+    }
+    function changeCalendarMonth(delta) {
+      const d = new Date(Date.UTC(selectedCalendarYear, selectedCalendarMonth + Number(delta), 1));
+      const y = d.getUTCFullYear();
+      const currentYear = Number(calendarTodayISO().slice(0,4));
+      const maxYear = Math.max(2035, currentYear + 5);
+      if (y < 2026 || y > maxYear) return;
+      selectedCalendarYear = y;
+      selectedCalendarMonth = d.getUTCMonth();
+      selectedCalendarDate = null;
+      renderCalendarMonths();
+      const scroller = document.getElementById('calendar-container');
+      if (scroller) scroller.scrollTop = 0;
     }
     function setCalendarYear(value) {
       const year = Number(value);
@@ -2688,6 +2091,7 @@
     function goCalendarToday() {
       const today = calendarTodayISO();
       selectedCalendarYear = Number(today.slice(0,4));
+      selectedCalendarMonth = Number(today.slice(5,7)) - 1;
       selectedCalendarDate = today;
       renderCalendarMonths();
       const scroller = document.getElementById('calendar-container');
@@ -2695,6 +2099,8 @@
       const todayCell = document.querySelector(`[data-calendar-date="${today}"]`);
       if (todayCell) todayCell.scrollIntoView({behavior:'smooth',block:'center'});
     }
+    window.setCalendarMonth = setCalendarMonth;
+    window.changeCalendarMonth = changeCalendarMonth;
     window.setCalendarYear = setCalendarYear;
     window.changeCalendarYear = changeCalendarYear;
     window.goCalendarToday = goCalendarToday;
@@ -2777,6 +2183,7 @@
     function selectCalendarDate(iso) {
       selectedCalendarDate = iso;
       selectedCalendarYear = Number(iso.slice(0,4));
+      selectedCalendarMonth = Number(iso.slice(5,7)) - 1;
       renderCalendarMonths();
       const modal = document.getElementById('calendarReportModal');
       const titleDate = document.getElementById('calendarReportModalDate');
@@ -2807,7 +2214,7 @@
       // Perbarui sorotan tanggal piket ketika tanggal operasional berganti (07.30 WIB).
       setInterval(() => {
         const nowDutyDate = calendarTodayISO();
-        if (nowDutyDate !== selectedCalendarDate) { selectedCalendarDate = nowDutyDate; selectedCalendarYear = Number(nowDutyDate.slice(0,4)); renderCalendarMonths(); }
+        if (nowDutyDate !== selectedCalendarDate) { selectedCalendarDate = nowDutyDate; selectedCalendarYear = Number(nowDutyDate.slice(0,4)); selectedCalendarMonth = Number(nowDutyDate.slice(5,7)) - 1; renderCalendarMonths(); }
         else renderCalendarMonths();
       }, 60000);
     });
